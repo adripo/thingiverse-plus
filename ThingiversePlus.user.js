@@ -35,7 +35,7 @@
         changeElementsPerPage(6);
         // Enable instant download button
         instantDownload();
-    } else if (pathname == "/" || pathname.startsWith("/search?")) {
+    } else if (pathname == "/" || pathname == "/search") {
         // Append elements per page selector
         appendPerPageSelect();
     }
