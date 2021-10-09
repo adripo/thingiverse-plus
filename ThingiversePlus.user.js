@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.1.8
+// @version      0.2.0
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -11,11 +11,13 @@
 // @supportURL   https://github.com/adripo/thingiverse-plus/issues
 // @match        https://www.thingiverse.com/*
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js
-// @require      https://raw.githubusercontent.com/CoeJoder/waitForKeyElements.js/master/waitForKeyElements.js
+// @require      https://cdn.jsdelivr.net/gh/CoeJoder/waitForKeyElements.js@v1.2/waitForKeyElements.js
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
+
+// TODO: remove jQuery
 
 (function ($) {
     'use strict';
@@ -23,82 +25,26 @@
     // Hide ads
     hideAds();
 
+    // Advanced collections
+    advancedCollections();
 
-    if (window.location.pathname.startsWith("/thing:")) {
-        // Instant download
-        instantDownload();
+
+    const pathname = window.location.pathname;
+    if (pathname.startsWith("/thing:")) {
         // Set 6 elements per page in "More"
-        chenagePerPage(6);
-    } else {
-
-        // Elements per page
-
-        let elementsPerPage = GM_getValue("per_page", 20);
-
-        let cssElementsPerPage = `
-.ElementsPerPage-plus {
-    background-color: #fff;
-    /*width: 300px;*/
-    margin-bottom: 10px;
-    position: relative;
-    display: inline-block;
-}
-
-.ElementsPerPage-plus>label{
-    display: inline-block;
-    width: 190px;
-    margin-left: 10px;
-}
-
-.ElementsPerPage-plus>select{
-    width: 100px;
-    height: 30px;
-}
-
-div[class^='FilterBySort__dropdown--'] {
-    margin-right: 20px;
-}
-  `;
-
-        let availablePerPageValues = [20, 30, 60, 100, 200];
-
-        let availableOptions = '';
-        $.each(availablePerPageValues, function (key, value) {
-            availableOptions += '<option value="' + value + '"' + ((elementsPerPage == value) ? " selected" : "") + '>' + value + '</option>\n';
-        });
-
-        let htmlElementsPerPage =
-            `<div class="ElementsPerPage-plus">
-    <label for="ElPerPage">Elements per page:</label><select id="ElPerPage">
-    ` + availableOptions + `
-    </select>
-</div>`;
-
-        GM_addStyle(cssElementsPerPage);
-
-        $("div[class^='FilterBySort__dropdown--']").after(htmlElementsPerPage);
-
-        $('#ElPerPage').change(elPerPageChangeAction);
-
-        function elPerPageChangeAction(e) {
-            //todo check value
-            GM_setValue("per_page", $(this).val());
-            window.location.reload(false);
-        }
-
-
-
-
-        chenagePerPage(elementsPerPage);
-
+        changeElementsPerPage(6);
+        // Enable instant download button
+        instantDownload();
+    } else if (pathname == "/" || pathname.startsWith("/search")) {
+        // Append elements per page selector
+        appendPerPageSelect();
     }
 
-    // advanced collections
 
+    /*** FUNCTIONS ***/
 
-    /* FUNCTIONS */
     function hideAds() {
-        let cssHideAds =
+        const cssHideAds =
             `div[class^='AdCard__'] {
                 display: none !important; 
             }`;
@@ -111,20 +57,112 @@ div[class^='FilterBySort__dropdown--'] {
         const thingMatch = window.location.pathname.match(/thing:(\d+)/);
         const thingId = thingMatch[1];
 
-        waitForKeyElements("a[class^='SidebarMenu__download--']", (downloadLink) => {
-            const downloadButton = downloadLink.querySelector("div")
-            downloadLink.href = `https://www.thingiverse.com/thing:${thingId}/zip`
-            downloadButton.parentNode.replaceChild(downloadButton.cloneNode(true), downloadButton);
-        })
+        const sidebarMenuBtnSelector = "a[class^='SidebarMenu__download--']";
+        const thingPageBtnSelector = "a[class^='ThingFilesListHeader__download--']";
+
+        // Sidebar menu download button
+        downloadLinkAppend(sidebarMenuBtnSelector, thingId);
+
+        // ThingPage download button
+        const thingPageSelector = "div[class^='ThingPage__tabContent--']";
+        waitForKeyElements(thingPageSelector, (thingPageDiv) => {
+            //const targetNode = document.querySelector(thingPageEl);
+            const observer = new MutationObserver(function (mutations) {
+                downloadLinkAppend(thingPageBtnSelector, thingId);
+            });
+
+            const config = {
+                subtree: false,
+                childList: true,
+                attributes: false,
+                characterData: false
+            };
+            observer.observe(thingPageDiv, config);
+        });
     }
 
-    function chenagePerPage(elementsPerPage) {
+    function downloadLinkAppend(selector, thingId) {
+        waitForKeyElements(selector, (downloadLink) => {
+            const downloadButton = downloadLink.querySelector("div");
+            downloadLink.href = `https://www.thingiverse.com/thing:${thingId}/zip`;
+            downloadButton.parentNode.replaceChild(downloadButton.cloneNode(true), downloadButton);
+        });
+    }
+
+
+    function changeElementsPerPage(elementsPerPage) {
         URLSearchParams.prototype._append = URLSearchParams.prototype.append;
         URLSearchParams.prototype.append = function append(k, v) {
             if (k === 'per_page') v = elementsPerPage;
             return this._append(k, v);
         }
     }
+
+
+    function appendPerPageSelect() {
+        const availablePerPageValues = [20, 30, 60, 100, 200];
+
+        const elementsPerPage = GM_getValue("per_page", 20);
+
+        const cssElementsPerPage =
+            `.ElementsPerPage-plus {
+                display: inline-block;
+                position: relative;
+                background-color: #fff;
+                width: 300px;
+                margin-bottom: 10px;
+            }
+
+            .ElementsPerPage-plus > label {
+                display: inline-block;
+                width: 190px;
+                margin-left: 10px;
+            }
+
+            .ElementsPerPage-plus > select {
+                width: 100px;
+                height: 30px;
+            }
+
+            div[class^='FilterBySort__dropdown--'] {
+                margin-right: 20px;
+            }`;
+
+        // Generate options from given values
+        let availableOptions = '';
+        availablePerPageValues.forEach(value => {
+            availableOptions += '<option value="' + value + '"' + ((elementsPerPage == value) ? " selected" : "") + '>' + value + '</option>\n';
+        });
+
+        // Generate html
+        let htmlElementsPerPage = document.createElement("div");
+        htmlElementsPerPage.className = "ElementsPerPage-plus";
+        htmlElementsPerPage.innerHTML =
+            `<label for="elPerPage">Elements per page:</label><select id="elPerPage">
+                ` + availableOptions + `
+            </select>`;
+
+        // Add CSS
+        GM_addStyle(cssElementsPerPage);
+
+        // Add html
+        const filterBySortSelector = "div[class^='FilterBySort__dropdown--']";
+        waitForKeyElements(filterBySortSelector, (filterBySortDiv) => {
+            filterBySortDiv.parentNode.insertBefore(htmlElementsPerPage, filterBySortDiv.nextSibling);
+        });
+
+        // Create event onChange
+        $('#ElPerPage').change(function () {
+            //todo check value
+            GM_setValue("per_page", $(this).val());
+            window.location.reload(false);
+        });
+
+        changeElementsPerPage(elementsPerPage);
+    }
+
+
+    function advancedCollections() {}
 
 })(jQuery);
 

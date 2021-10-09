@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.1.8
+// @version      0.2.0
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
