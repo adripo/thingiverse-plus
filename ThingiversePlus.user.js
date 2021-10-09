@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.2.0
+// @version      0.2.1
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -66,7 +66,6 @@
         // ThingPage download button
         const thingPageSelector = "div[class^='ThingPage__tabContent--']";
         waitForKeyElements(thingPageSelector, (thingPageDiv) => {
-            //const targetNode = document.querySelector(thingPageEl);
             const observer = new MutationObserver(function (mutations) {
                 downloadLinkAppend(thingPageBtnSelector, thingId);
             });
@@ -102,8 +101,12 @@
     function appendPerPageSelect() {
         const availablePerPageValues = [20, 30, 60, 100, 200];
 
+        // Get previously saved value for per_page
         const elementsPerPage = GM_getValue("per_page", 20);
+        // Change value of elements per page to load
+        changeElementsPerPage(elementsPerPage);
 
+        // Generate CSS
         const cssElementsPerPage =
             `.ElementsPerPage-plus {
                 display: inline-block;
@@ -137,8 +140,9 @@
         // Generate html
         let htmlElementsPerPage = document.createElement("div");
         htmlElementsPerPage.className = "ElementsPerPage-plus";
+        const perPageSelectId = "elPerPage";
         htmlElementsPerPage.innerHTML =
-            `<label for="elPerPage">Elements per page:</label><select id="elPerPage">
+            `<label for="` + perPageSelectId + `">Elements per page:</label><select id="` + perPageSelectId + `">
                 ` + availableOptions + `
             </select>`;
 
@@ -152,13 +156,14 @@
         });
 
         // Create event onChange
-        $('#ElPerPage').change(function () {
-            //todo check value
-            GM_setValue("per_page", $(this).val());
+        const perPageSelectEl = document.getElementById(perPageSelectId);
+        perPageSelectEl.addEventListener('change', (event) => {
+            const newPerPageValue = parseInt(event.target.value);
+            if (availablePerPageValues.includes(newPerPageValue)) {
+                GM_setValue("per_page", newPerPageValue);
+            }
             window.location.reload(false);
         });
-
-        changeElementsPerPage(elementsPerPage);
     }
 
 
