@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.1.5
+// @version      0.1.6
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -11,6 +11,7 @@
 // @supportURL   https://github.com/adripo/thingiverse-plus/issues
 // @match        https://www.thingiverse.com/*
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js
+// @require      https://raw.githubusercontent.com/CoeJoder/waitForKeyElements.js/master/waitForKeyElements.js
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -19,17 +20,15 @@
 (function ($) {
     'use strict';
 
-
-
-
     // Hide ads
-    let cssHideAds = `
-  div[class^='SearchResult__searchResultItems--'] div[class^='AdCard__card--'] {
-    display: none;
-  }
-  `;
+    hideAds();
 
-    GM_addStyle(cssHideAds);
+
+    if (window.location.pathname.startsWith("thing:")) {
+        // Instant download
+        instantDownload();
+    } else {
+
 
 
 
@@ -73,7 +72,7 @@ div[class^='FilterBySort__dropdown--'] {
     });
 
     let htmlElementsPerPage =
-`<div class="ElementsPerPage-plus">
+        `<div class="ElementsPerPage-plus">
     <label for="ElPerPage">Elements per page:</label><select id="ElPerPage">
     ` + availableOptions + `
     </select>
@@ -92,6 +91,8 @@ div[class^='FilterBySort__dropdown--'] {
         //todo save page number and append???
     }
 
+}
+
 
 
     URLSearchParams.prototype._append = URLSearchParams.prototype.append;
@@ -106,79 +107,7 @@ div[class^='FilterBySort__dropdown--'] {
 
 
 
-    // Instant download
 
-    /**
-     * From https://github.com/CoeJoder/waitForKeyElements.js
-     *
-     * A utility function for userscripts that detects and handles AJAXed content.
-     *
-     * Usage example:
-     *
-     *     function callback(domElement) {
-     *         domElement.innerHTML = "This text inserted by waitForKeyElements().";
-     *     }
-     * 
-     *     waitForKeyElements("div.comments", callback);
-     *     // or
-     *     waitForKeyElements(selectorFunction, callback);
-     *
-     * @param {(string|function)} selectorOrFunction - The selector string or function.
-     * @param {function} callback - The callback function; takes a single DOM element as parameter.
-     *                              If returns true, element will be processed again on subsequent iterations.
-     * @param {boolean} [waitOnce=true] - Whether to stop after the first elements are found.
-     * @param {number} [interval=300] - The time (ms) to wait between iterations.
-     * @param {number} [maxIntervals=-1] - The max number of intervals to run (negative number for unlimited).
-     */
-    function waitForKeyElements(selectorOrFunction, callback, waitOnce, interval, maxIntervals) {
-        if (typeof waitOnce === "undefined") {
-            waitOnce = true;
-        }
-        if (typeof interval === "undefined") {
-            interval = 300;
-        }
-        if (typeof maxIntervals === "undefined") {
-            maxIntervals = -1;
-        }
-        var targetNodes = (typeof selectorOrFunction === "function") ?
-            selectorOrFunction() :
-            document.querySelectorAll(selectorOrFunction);
-
-        var targetsFound = targetNodes && targetNodes.length > 0;
-        if (targetsFound) {
-            targetNodes.forEach(function (targetNode) {
-                var attrAlreadyFound = "data-userscript-alreadyFound";
-                var alreadyFound = targetNode.getAttribute(attrAlreadyFound) || false;
-                if (!alreadyFound) {
-                    var cancelFound = callback(targetNode);
-                    if (cancelFound) {
-                        targetsFound = false;
-                    } else {
-                        targetNode.setAttribute(attrAlreadyFound, true);
-                    }
-                }
-            });
-        }
-
-        if (maxIntervals !== 0 && !(targetsFound && waitOnce)) {
-            maxIntervals -= 1;
-            setTimeout(function () {
-                waitForKeyElements(selectorOrFunction, callback, waitOnce, interval, maxIntervals);
-            }, interval);
-        }
-    }
-
-
-    if (window.location.pathname.startsWith("thing:")){
-        const thingMatch = window.location.pathname.match(/thing:(\d+)/);
-        const thingId = thingMatch[1];
-
-        waitForKeyElements("a[class*='SidebarMenu__download']", (downloadLink) => {
-            const downloadButton = downloadLink.querySelector("div")
-            downloadLink.href = `https://www.thingiverse.com/thing:${thingId}/zip`
-            downloadButton.parentNode.replaceChild(downloadButton.cloneNode(true), downloadButton);
-        })
-    }
 
 
 
@@ -187,6 +116,27 @@ div[class^='FilterBySort__dropdown--'] {
     // advanced collections
 
 
+    /* FUNCTIONS */
+    function hideAds() {
+        let cssHideAds =
+            `div[class^='AdCard__card--'] {
+    display: none;
+}`;
+
+        GM_addStyle(cssHideAds);
+    }
+
+
+    function instantDownload() {
+        const thingMatch = window.location.pathname.match(/thing:(\d+)/);
+        const thingId = thingMatch[1];
+
+        waitForKeyElements("a[class^='SidebarMenu__download--']", (downloadLink) => {
+            const downloadButton = downloadLink.querySelector("div")
+            downloadLink.href = `https://www.thingiverse.com/thing:${thingId}/zip`
+            downloadButton.parentNode.replaceChild(downloadButton.cloneNode(true), downloadButton);
+        })
+    }
 
 })(jQuery);
 
