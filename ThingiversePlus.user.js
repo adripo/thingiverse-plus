@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.1.6
+// @version      0.1.7
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -24,22 +24,16 @@
     hideAds();
 
 
-    if (window.location.pathname.startsWith("thing:")) {
+    if (window.location.pathname.startsWith("/thing:")) {
         // Instant download
         instantDownload();
     } else {
 
+        // Elements per page
 
+        let elementsPerPage = GM_getValue("per_page", 20);
 
-
-
-
-
-    // Elements per page
-
-    let elementsPerPage = GM_getValue("per_page", 20);
-
-    let cssElementsPerPage = `
+        let cssElementsPerPage = `
 .ElementsPerPage-plus {
     background-color: #fff;
     /*width: 300px;*/
@@ -64,54 +58,42 @@ div[class^='FilterBySort__dropdown--'] {
 }
   `;
 
-    let availablePerPageValues = [20, 30, 60, 100, 200];
+        let availablePerPageValues = [20, 30, 60, 100, 200];
 
-    let availableOptions = '';
-    $.each(availablePerPageValues, function (key, value) {
-        availableOptions += '<option value="' + value + '"' + ((elementsPerPage == value) ? " selected" : "") + '>' + value + '</option>\n';
-    });
+        let availableOptions = '';
+        $.each(availablePerPageValues, function (key, value) {
+            availableOptions += '<option value="' + value + '"' + ((elementsPerPage == value) ? " selected" : "") + '>' + value + '</option>\n';
+        });
 
-    let htmlElementsPerPage =
-        `<div class="ElementsPerPage-plus">
+        let htmlElementsPerPage =
+            `<div class="ElementsPerPage-plus">
     <label for="ElPerPage">Elements per page:</label><select id="ElPerPage">
     ` + availableOptions + `
     </select>
 </div>`;
 
-    GM_addStyle(cssElementsPerPage);
+        GM_addStyle(cssElementsPerPage);
 
-    $("div[class^='FilterBySort__dropdown--']").after(htmlElementsPerPage);
+        $("div[class^='FilterBySort__dropdown--']").after(htmlElementsPerPage);
 
-    $('#ElPerPage').change(elPerPageChangeAction);
+        $('#ElPerPage').change(elPerPageChangeAction);
 
-    function elPerPageChangeAction(e) {
-        //todo check value
-        GM_setValue("per_page", $(this).val());
-        window.location.reload(false);
-        //todo save page number and append???
+        function elPerPageChangeAction(e) {
+            //todo check value
+            GM_setValue("per_page", $(this).val());
+            window.location.reload(false);
+        }
+
+
+
+
+        URLSearchParams.prototype._append = URLSearchParams.prototype.append;
+        URLSearchParams.prototype.append = function append(k, v) {
+            if (k === 'per_page') v = elementsPerPage;
+            return this._append(k, v);
+        }
+
     }
-
-}
-
-
-
-    URLSearchParams.prototype._append = URLSearchParams.prototype.append;
-    URLSearchParams.prototype.append = function append(k, v) {
-        if (k === 'per_page') v = elementsPerPage;
-        return this._append(k, v);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
 
     // advanced collections
 
@@ -119,9 +101,9 @@ div[class^='FilterBySort__dropdown--'] {
     /* FUNCTIONS */
     function hideAds() {
         let cssHideAds =
-            `div[class^='AdCard__card--'] {
-    display: none;
-}`;
+            `div[class^='AdCard__'] {
+                display: none !important; 
+            }`;
 
         GM_addStyle(cssHideAds);
     }
