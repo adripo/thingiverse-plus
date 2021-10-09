@@ -17,7 +17,7 @@
 // @grant        GM_setValue
 // ==/UserScript==
 
-// TODO: remove jQuery
+// TODO: remove jQuery (require, $, jquery)
 
 (function ($) {
     'use strict';
@@ -35,7 +35,7 @@
         changeElementsPerPage(6);
         // Enable instant download button
         instantDownload();
-    } else if (pathname == "/" || pathname.startsWith("/search")) {
+    } else if (pathname == "/" || pathname.startsWith("/search?")) {
         // Append elements per page selector
         appendPerPageSelect();
     }
@@ -167,7 +167,9 @@
     }
 
 
-    function advancedCollections() {}
+    function advancedCollections() {
+
+    }
 
 })(jQuery);
 
