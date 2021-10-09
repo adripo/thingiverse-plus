@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.1.4
+// @version      0.1.5
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -169,14 +169,16 @@ div[class^='FilterBySort__dropdown--'] {
     }
 
 
-    const thingMatch = window.location.pathname.match(/thing:(\d+)/);
-    const thingId = thingMatch[1];
+    if (window.location.pathname.startsWith("thing:")){
+        const thingMatch = window.location.pathname.match(/thing:(\d+)/);
+        const thingId = thingMatch[1];
 
-    waitForKeyElements("a[class*='SidebarMenu__download']", (downloadLink) => {
-        const downloadButton = downloadLink.querySelector("div")
-        downloadLink.href = `https://www.thingiverse.com/thing:${thingId}/zip`
-        downloadButton.parentNode.replaceChild(downloadButton.cloneNode(true), downloadButton);
-    })
+        waitForKeyElements("a[class*='SidebarMenu__download']", (downloadLink) => {
+            const downloadButton = downloadLink.querySelector("div")
+            downloadLink.href = `https://www.thingiverse.com/thing:${thingId}/zip`
+            downloadButton.parentNode.replaceChild(downloadButton.cloneNode(true), downloadButton);
+        })
+    }
 
 
 
