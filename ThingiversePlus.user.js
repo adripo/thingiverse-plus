@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.2.1
+// @version      0.3.0
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -10,16 +10,13 @@
 // @downloadURL  https://raw.githubusercontent.com/adripo/thingiverse-plus/main/ThingiversePlus.user.js
 // @supportURL   https://github.com/adripo/thingiverse-plus/issues
 // @match        https://www.thingiverse.com/*
-// @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js
 // @require      https://cdn.jsdelivr.net/gh/CoeJoder/waitForKeyElements.js@v1.2/waitForKeyElements.js
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
 
-// TODO: remove jQuery (require, $, jquery)
-
-(function ($) {
+(function () {
     'use strict';
 
     // Hide ads
@@ -28,20 +25,21 @@
     // Advanced collections
     advancedCollections();
 
-
     const pathname = window.location.pathname;
-    if (pathname.startsWith("/thing:")) {
-        // Set 6 elements per page in "More"
+    if (pathname.startsWith('/thing:')) {
+        // Set 6 elements per page in 'More'
         changeElementsPerPage(6);
         // Enable instant download button
         instantDownload();
-    } else if (pathname == "/" || pathname == "/search") {
+    } else if (pathname == '/' || pathname == '/search') {
         // Append elements per page selector
         appendPerPageSelect();
     }
 
 
     /*** FUNCTIONS ***/
+
+    /* Hide Ads */
 
     function hideAds() {
         const cssHideAds =
@@ -53,18 +51,20 @@
     }
 
 
+    /* Instant Download */
+
     function instantDownload() {
         const thingMatch = window.location.pathname.match(/thing:(\d+)/);
         const thingId = thingMatch[1];
 
-        const sidebarMenuBtnSelector = "a[class^='SidebarMenu__download--']";
-        const thingPageBtnSelector = "a[class^='ThingFilesListHeader__download--']";
+        const sidebarMenuBtnSelector = 'a[class^="SidebarMenu__download--"]';
+        const thingPageBtnSelector = 'a[class^="ThingFilesListHeader__download--"]';
 
         // Sidebar menu download button
         downloadLinkAppend(sidebarMenuBtnSelector, thingId);
 
         // ThingPage download button
-        const thingPageSelector = "div[class^='ThingPage__tabContent--']";
+        const thingPageSelector = 'div[class^="ThingPage__tabContent--"]';
         waitForKeyElements(thingPageSelector, (thingPageDiv) => {
             const observer = new MutationObserver(function (mutations) {
                 downloadLinkAppend(thingPageBtnSelector, thingId);
@@ -82,12 +82,14 @@
 
     function downloadLinkAppend(selector, thingId) {
         waitForKeyElements(selector, (downloadLink) => {
-            const downloadButton = downloadLink.querySelector("div");
+            const downloadButton = downloadLink.querySelector('div');
             downloadLink.href = `https://www.thingiverse.com/thing:${thingId}/zip`;
             downloadButton.parentNode.replaceChild(downloadButton.cloneNode(true), downloadButton);
         });
     }
 
+
+    /* Change Elements Per Page */
 
     function changeElementsPerPage(elementsPerPage) {
         URLSearchParams.prototype._append = URLSearchParams.prototype.append;
@@ -98,11 +100,13 @@
     }
 
 
+    /* Append Per Page Select */
+
     function appendPerPageSelect() {
         const availablePerPageValues = [20, 30, 60, 100, 200];
 
         // Get previously saved value for per_page
-        const elementsPerPage = GM_getValue("per_page", 20);
+        const elementsPerPage = GM_getValue('per_page', 20);
         // Change value of elements per page to load
         changeElementsPerPage(elementsPerPage);
 
@@ -133,14 +137,14 @@
 
         // Generate options from given values
         let availableOptions = '';
-        availablePerPageValues.forEach(value => {
-            availableOptions += '<option value="' + value + '"' + ((elementsPerPage == value) ? " selected" : "") + '>' + value + '</option>\n';
+        availablePerPageValues.forEach(value => { //TODO create elements instead of direct text
+            availableOptions += '<option value="' + value + '"' + ((elementsPerPage == value) && " selected") + '>' + value + '</option>\n';
         });
 
         // Generate html
-        let htmlElementsPerPage = document.createElement("div");
-        htmlElementsPerPage.className = "ElementsPerPage-plus";
-        const perPageSelectId = "elPerPage";
+        let htmlElementsPerPage = document.createElement('div');
+        htmlElementsPerPage.className = 'ElementsPerPage-plus';
+        const perPageSelectId = 'elPerPage';
         htmlElementsPerPage.innerHTML =
             `<label for="` + perPageSelectId + `">Elements per page:</label><select id="` + perPageSelectId + `">
                 ` + availableOptions + `
@@ -150,7 +154,7 @@
         GM_addStyle(cssElementsPerPage);
 
         // Add html
-        const filterBySortSelector = "div[class^='FilterBySort__dropdown--']";
+        const filterBySortSelector = 'div[class^="FilterBySort__dropdown--"]';
         waitForKeyElements(filterBySortSelector, (filterBySortDiv) => {
             filterBySortDiv.parentNode.insertBefore(htmlElementsPerPage, filterBySortDiv.nextSibling);
         });
@@ -160,162 +164,161 @@
         perPageSelectEl.addEventListener('change', (event) => {
             const newPerPageValue = parseInt(event.target.value);
             if (availablePerPageValues.includes(newPerPageValue)) {
-                GM_setValue("per_page", newPerPageValue);
+                GM_setValue('per_page', newPerPageValue);
             }
             window.location.reload(false);
         });
     }
 
 
+    /* Advanced Collections */
+
     function advancedCollections() {
 
-    }
+        const bearer = extractBearer();
 
-})(jQuery);
+        if (bearer) {
+            const username = extractUsername();
 
+            getCollections(username, bearer)
+                .then(collectionsList => {
+                    console.log('Successfully retrieved Collections.');
 
-
-/*
-
-  // ==UserScript==
-// @name         Thingiverse_Advanced_Collections
-// @namespace    https://thingiverse.com/
-// @version      0.2
-// @description  try to take over the world!
-// @author       adripo
-// @icon         https://www.thingiverse.com/favicon.ico
-// @match        https://www.thingiverse.com/thing:*
-// @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js
-// @require      https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js
-// @resource     select2CSS https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css
-// @grant        GM_addStyle
-// @grant        GM_getResourceText
-// ==/UserScript==
-
-// Get external CSS resources
-var select2CSS = GM_getResourceText ("select2CSS");
-GM_addStyle (select2CSS);
-
-(function ($) {
-    "use strict";
-
-    const BEARER = extractBearer();
-
-    if (BEARER) {
-        const USERNAME = JSON.parse(window.localStorage["user-data"]).data.name;
-
-        $.ajax({
-            url:
-                "https://api.thingiverse.com/users/" +
-                USERNAME +
-                "/collections/true",
-            type: "GET",
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", "Bearer " + BEARER);
-            },
-            data: {},
-            success: function () {},
-            error: function () {},
-        });
-        $.ajax({
-            type: "GET",
-            url:
-                "https://api.thingiverse.com/users/" +
-                USERNAME +
-                "/collections/true",
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", "Bearer " + BEARER);
-            },
-            success: function (collectionsList, status) {
-                console.log("Success");
-
-                // Put most recent collection in the first place
-                let indexMR = indexOfMostRecentCollection(collectionsList);
-                if (indexMR != -1) {
-                    collectionsList.unshift(
-                        collectionsList.splice(indexMR, 1)[0]
-                    );
-                }
-
-                // Get all selects that contains Collections
-                let selectListEls = $(".react-app select>option")
-                    .filter(function () {
-                        return $(this).html() == "Create a new Collection";
-                    })
-                    .parent();
-
-                // Remove existing options
-                $(selectListEls).children().remove();
-                // Add options in each Collection
-                console.log(selectListEls);
-                $.each(selectListEls, function (key, selectEl) {
-                    $.each(collectionsList, function (key, collection) {
-                        $(selectEl).append(
-                            $("<option></option>")
-                                .attr("value", collection.id)
-                                .text(
-                                    collection.name +
-                                        " (" +
-                                        collection.count +
-                                        ")"
-                                )
+                    // Put most recent Collection in the first place
+                    let indexMR = indexOfMostRecentCollection(collectionsList);
+                    if (indexMR) {
+                        collectionsList.unshift(
+                            collectionsList.splice(indexMR, 1)[0]
                         );
+                    }
+
+                    // Generate list of option nodes with all Collections
+                    let first = true;
+                    let optionList = new Array();
+                    collectionsList.forEach(collection => {
+                        var option = document.createElement('option');
+                        option.value = collection.id;
+
+                        // if (first){
+                        //     option.selected = true;
+                        //     first = false;
+                        // }
+                        option.text = collection.name + ' (' + collection.count + ')';
+                        optionList.push(option);
                     });
-                    $(selectEl).append(
-                        $("<option hidden style=\"display:none\"></option>")
-                            .attr("value", "-1")
-                            .text("Create a new Collection")
-                    );
 
-                    // Convert select to select2
-                    //$(selectEl).select2();
+                    // Generate option to 'Create new Collection'
+                    let createNewOption = document.createElement('option');
+                    createNewOption.style = 'display: none;';
+                    createNewOption.value = '-1';
+                    createNewOption.text = 'Create a new Collection';
+                    optionList.push(createNewOption);
 
-                    // Default select first option
-                    // $(selectHtml).parent().parent().removeClass("CollectThingWindow__hidden--OSA7G")
-                    //console.log($(selectHtml).children().first().val());
-                    //console.log($(selectHtml).val());
-                    //$(selectHtml).children().first().attr("selected","selected");
-                    //$(selectHtml).children().first().prop("selected","selected");
-                    //$(selectHtml).val("-1");
-                    //$(selectHtml).val($(selectHtml).children().first().val());
-                    //$(selectHtml).trigger('chosen:updated')
+                    // Get all select nodes that contains Collections
+                    let selectList = Array.from(document.querySelectorAll('.react-app select>option'))
+                        .filter(option => option.innerHTML == 'Create a new Collection')
+                        .map(option => option.parentNode);
 
-                    // Add new Collection button
-                    $(selectEl).css("width", "84%");
-                    $(selectEl).after(
-                        '<span><button type="button" style="width: 16%; height: 30px;">+</button></span>'
-                    );
-                    $(selectEl)
-                        .siblings("span")
-                        .children("button")
-                        .on("click", function () {
-                            $(selectEl).val("-1");
 
-                            var changeEvent = new Event('change', { bubbles: true });
+
+                    /** just a Workaround to select first option of connections. it automatically selects the last created.*/
+                    /* instead use observer.observe to intercept when select changes (visible) and select the correct option  */
+                    // Get 'Collect Thing' nodes
+                    let collectThingListFirst = Array.from(document.querySelectorAll('a[class^="SideMenuItem__textWrapper--"]'))
+                        .filter(option => option.innerHTML == 'Collect Thing')
+                        .map(option => option.parentNode);
+
+                    let collectThingListBottom = Array.from(document.querySelectorAll('div[class^="CardActionItem__textWrapper--"]'))
+                        .filter(option => option.innerHTML == 'Collect Thing')
+                        .map(option => option.parentNode.parentNode.parentNode);
+
+                    let collectThingList = collectThingListFirst.concat(collectThingListBottom);
+
+                    collectThingList.forEach(collectButton => {
+                        collectButton.onclick = async function(){
+                            await sleep(0);
+                            selectList.forEach(selectEl => {
+                                selectEl.selectedIndex = 0;
+                            });
+                        };
+                    });
+
+                    function sleep(ms) {
+                        return new Promise(resolve => setTimeout(resolve, ms));
+                    }
+
+                    /*** end workaround */
+
+                    // Replace existing option nodes with new ones in all select nodes
+                    selectList.forEach(selectEl => {
+                        // Clone nodes
+                        var newOptionList = optionList.map(option => option.cloneNode(true));
+
+                        // Replace children
+                        selectEl.replaceChildren(...newOptionList);
+                        selectEl.selectedIndex = 0;
+                        //TODO if account has no collections select 'create new collection' and trigger selectEl.dispatchEvent(changeEvent);
+
+                        // Generate button that can be used to 'Create new Collection'
+                        //TODO generate one button and function outside foreach. Inside just clone button and associate function with current select
+                        let plusButton = document.createElement('button');
+                        plusButton.style = 'width: 16%; height: 30px;';
+                        plusButton.textContent = '+';
+                        plusButton.onclick = function(){
+                            selectEl.value = '-1';
+                            var changeEvent = new Event('change', {
+                                bubbles: true
+                            });
                             selectEl.dispatchEvent(changeEvent);
-                        });
-                });
+                        };
 
-                console.log(collectionsList);
-            },
-            error: function (xmlRequest) {
-                console.log("Error:");
-                console.log(xmlRequest);
-            },
-        });
+                        // Generate span with button
+                        let plusButtonSpan = generateSpan(plusButton);
+
+                        // Change current select style
+                        selectEl.style = 'width: 84%;';
+
+                        // Append created span with button after current select
+                        selectEl.after(plusButtonSpan);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
     }
+
 
     function extractBearer() {
         try {
-            return JSON.parse(window.localStorage["user-data"]).user;
+            return JSON.parse(window.localStorage['user-data']).user;
         } catch (e) {
             return null;
         }
     }
 
+    function extractUsername() {
+        try {
+            return JSON.parse(window.localStorage['user-data']).data.name;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function getCollections(username = '', bearer = '') {
+        const collectionsUrl = 'https://api.thingiverse.com/users/' + username + '/collections/true';
+        const response = await fetch(collectionsUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + bearer
+            }
+        });
+        return response.json();
+    }
+
     function indexOfMostRecentCollection(collections) {
         if (collections.length === 0) {
-            return -1;
+            return null;
         }
 
         var mostRecent = new Date(collections[0].modified);
@@ -330,5 +333,15 @@ GM_addStyle (select2CSS);
 
         return mostRecentIndex;
     }
-})(jQuery);
-*/
+
+    function generateSpan(childNode = null){
+        let spanEl = document.createElement('span');
+        if(childNode){
+            spanEl.appendChild(childNode);
+        }
+        return spanEl;
+    }
+
+    /*** ***/
+
+})();
