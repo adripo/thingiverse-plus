@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.4.0
+// @version      0.4.1
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -34,7 +34,7 @@
         changeElementsPerPage(6);
         // Enable instant download button
         //instantDownload();
-        downloadAllFiles();
+        downloadAllButton();
     } else if (pathname == '/' || pathname == '/search') {
         // Append elements per page selector
         appendPerPageSelect();
@@ -382,6 +382,19 @@
             .then(function (content) {
                 saveAs(content, zipName);
             });
+    }
+
+    function downloadAllButton() {
+
+        const sidebarMenuBtnSelector = 'a[class^="SidebarMenu__download--"]';
+
+        // Sidebar menu download button
+        waitForKeyElements(sidebarMenuBtnSelector, (downloadLink) => {
+            let collectButton = document.querySelector(sidebarMenuBtnSelector);
+            collectButton.onclick = async function(){
+                downloadAllFiles();
+            };
+        });
     }
 
     function extractCurrentThing() {
