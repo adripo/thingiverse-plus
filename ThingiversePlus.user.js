@@ -30,6 +30,8 @@
 
     const pathname = window.location.pathname;
     if (pathname.startsWith('/thing:')) {
+        // Show enable buttons
+
         // Set 6 elements per page in 'More'
         changeElementsPerPage(6);
         // Enable instant download button
@@ -375,7 +377,7 @@
             imgFolder.file(image.name, filePromise);
         });
 
-        let zipName = thing.id + ' ' + thing.name;
+        let zipName = thing.id + ' - ' + thing.name;
         zipName = filenameValidator(zipName).fname;
 
         zip.generateAsync({type: "blob"})
@@ -405,9 +407,6 @@
         }
     }
 
-    // String.prototype.stripSlashes = function(){
-    //     return this.replace(/\\(.)/mg, "$1");
-    // }
     function stripDoubleBackslashes (str) {
         return (str + '').replace("\\", "");
     }
@@ -461,13 +460,8 @@
         };
     }
 
-    var rg1=/^[^\\/:\*\?"<>\|]+$/; // forbidden characters \ / : * ? " < > |
-    var rg2=/^\./; // cannot start with dot (.)
-    var rg3=/^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
-    return function isValid(fname){
-        return rg1.test(fname)&&!rg2.test(fname)&&!rg3.test(fname);
-    }
 
+    
     /*** ***/
 
 })();
