@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.3.0
+// @version      0.4.0
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -11,11 +11,14 @@
 // @supportURL   https://github.com/adripo/thingiverse-plus/issues
 // @match        https://www.thingiverse.com/*
 // @require      https://cdn.jsdelivr.net/gh/CoeJoder/waitForKeyElements.js@v1.2/waitForKeyElements.js
+// @require      https://raw.githubusercontent.com/eligrey/FileSaver.js/master/src/FileSaver.js
+// @require      https://raw.githubusercontent.com/Stuk/jszip/master/dist/jszip.min.js
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
 
+//TODO docs for functions
 (function () {
     'use strict';
 
@@ -30,7 +33,8 @@
         // Set 6 elements per page in 'More'
         changeElementsPerPage(6);
         // Enable instant download button
-        instantDownload();
+        //instantDownload();
+        downloadAllFiles();
     } else if (pathname == '/' || pathname == '/search') {
         // Append elements per page selector
         appendPerPageSelect();
@@ -340,6 +344,115 @@
             spanEl.appendChild(childNode);
         }
         return spanEl;
+    }
+
+
+    /* Download All Files */
+
+    function downloadAllFiles() {
+
+        let zip = new JSZip();
+        let imgFolder = zip.folder("images");
+
+        let thing = JSON.parse(stripDoubleBackslashes(extractCurrentThing())).thing;
+        let files = thing.files;
+
+        files.forEach(file => {
+            let filePromise = downloadFile(file.direct_url);
+            zip.file(file.name, filePromise);
+        });
+
+        let images = thing.images;
+
+        images.forEach(image => {
+            let largeImages = image.sizes.filter( el => {
+                return el.type=="display" &&
+                    el.size=="large";
+            });
+            let imageUrl = largeImages[0].url;
+
+            let filePromise = downloadFile(imageUrl);
+            imgFolder.file(image.name, filePromise);
+        });
+
+        let zipName = thing.id + ' ' + thing.name;
+        zipName = filenameValidator(zipName).fname;
+
+        zip.generateAsync({type: "blob"})
+            .then(function (content) {
+                saveAs(content, zipName);
+            });
+    }
+
+    function extractCurrentThing() {
+        try {
+            return JSON.parse(window.localStorage['persist:root']).currentThing;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // String.prototype.stripSlashes = function(){
+    //     return this.replace(/\\(.)/mg, "$1");
+    // }
+    function stripDoubleBackslashes (str) {
+        return (str + '').replace("\\", "");
+    }
+
+    async function downloadFile(url) {
+        const response = await fetch(url, {
+            method: 'GET'
+        }).catch((error) => {
+            console.error('Error:', error);
+        });
+
+        return response.arrayBuffer();
+    }
+
+    function convertToValidFilename(str){
+        return (str + '')
+            .replace(/\n/g," ")
+            .replace(/[<>:"/\\|?*\x00-\x1F]| +$/g,"")
+            .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/,x=>x+"_");
+    }
+
+    function filenameValidator(fname, { replacement = "�" } = {}) {
+        // https://stackoverflow.com/a/31976060
+        // https://gist.github.com/doctaphred/d01d05291546186941e1b7ddc02034d3
+
+        const fname_original = fname;
+
+        // resolve multi-line, whitespace trimming
+        fname = fname.split(/[\r\n]/).map(s => s.trim()).filter(s => s.length).join("  ");
+
+        // forbidden characters
+        // (after multi-line, because new-line-chars are themselves forbidden characters)
+        fname = fname.replaceAll(/[<>:"\/\\\|?*\x00-\x1F]/g, replacement);
+
+        // advanced trim
+        fname = fname.replace(/\.$/, "");
+
+        // empty filename
+        if (!fname.length) {
+            fname = '_';
+        }
+
+        // forbidden filenames
+        if (fname.match(/^(CON|PRN|AUX|NUL|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9|LPT1|LPT2|LPT3|LPT4|LPT5|LPT6|LPT7|LPT8|LPT9)(\..+)?$/)) {
+            fname = `_${fname}`;
+        }
+
+        return {
+            fname,
+            isOriginal: (fname === fname_original),
+        };
+    }
+
+    var rg1=/^[^\\/:\*\?"<>\|]+$/; // forbidden characters \ / : * ? " < > |
+    var rg2=/^\./; // cannot start with dot (.)
+    var rg3=/^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
+    return function isValid(fname){
+        return rg1.test(fname)&&!rg2.test(fname)&&!rg3.test(fname);
     }
 
     /*** ***/

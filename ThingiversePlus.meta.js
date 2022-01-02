@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.3.0
+// @version      0.4.0
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -11,6 +11,8 @@
 // @supportURL   https://github.com/adripo/thingiverse-plus/issues
 // @match        https://www.thingiverse.com/*
 // @require      https://cdn.jsdelivr.net/gh/CoeJoder/waitForKeyElements.js@v1.2/waitForKeyElements.js
+// @require      https://raw.githubusercontent.com/eligrey/FileSaver.js/master/src/FileSaver.js
+// @require      https://raw.githubusercontent.com/Stuk/jszip/master/dist/jszip.min.js
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
