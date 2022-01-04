@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.5.2
+// @version      0.5.3
 // @description  Thingiverse with extra features
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -204,7 +204,23 @@
         GM_addStyle(cssPlusSettings);
         body.appendChild(settingsButton);
         body.appendChild(settingsContainer);
+        closeContainerListener();
 
+    }
+
+    function closeContainerListener() {
+        window.addEventListener('click', function(e){
+            let settingsContainer = document.querySelector('.plus-settings-container');
+            let settingsButton = document.querySelector('.plus-settings-button');
+
+            // if Settings Container is visible and click outside of settings button and outside the container
+            if (!settingsContainer.classList.contains('plus-settings-hidden') &&
+                !settingsButton.contains(e.target) &&
+                !settingsContainer.contains(e.target)
+            ){
+                settingsContainer.classList.add('plus-settings-hidden');
+            }
+        });
     }
 
     function checkAndHideAds() {
