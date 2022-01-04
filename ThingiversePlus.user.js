@@ -31,7 +31,7 @@
     // Hide ads
     checkAndHideAds();
 
-    // Advanced collections
+    // Enable Advanced collections
     checkAndEnableAdvancedCollections();
 
     const pathname = window.location.pathname;
@@ -39,7 +39,7 @@
         // Set 6 elements per page in 'More'
         changeElementsPerPage(6);
 
-        // Enable instant download button
+        // Enable 'Download All Files' button
         //instantDownload();
         downloadAllButton();
     } else if (pathname == '/' || pathname == '/search') {
@@ -135,11 +135,11 @@
         // ThingiversePlus-logo image
         let img = document.createElement('img');
         img.src = buttonImage;
-        img.alt = "ThingiversePlus-logo"
+        img.alt = 'ThingiversePlus-logo';
 
         img.onclick = function(){
             let settingsContainer = document.querySelector('.plus-settings-container');
-            settingsContainer.classList.toggle("plus-settings-hidden");
+            settingsContainer.classList.toggle('plus-settings-hidden');
         };
 
         settingsButton.appendChild(img);
@@ -153,8 +153,8 @@
         // Settings for 'Hide Ads'
         let settingsHideAds = document.createElement('div');
         let checkboxHideAds = document.createElement('input');
-        checkboxHideAds.type = "checkbox";
-        checkboxHideAds.id = "plus-hide-ads";
+        checkboxHideAds.type = 'checkbox';
+        checkboxHideAds.id = 'plus-hide-ads';
         //checkboxHideAds.checked = true; //TODO save and get value from local storage
         checkboxHideAds.className = 'plus-settings-checkbox';
         checkboxHideAds.onchange = function(){
@@ -162,8 +162,8 @@
         };
 
         let labelHideAds = document.createElement('label');
-        labelHideAds.htmlFor = "plus-hide-ads";
-        labelHideAds.innerHTML = "Hide Ads";
+        labelHideAds.htmlFor = 'plus-hide-ads';
+        labelHideAds.innerHTML = 'Hide Ads';
 
         settingsHideAds.appendChild(checkboxHideAds);
         settingsHideAds.appendChild(labelHideAds);
@@ -173,8 +173,8 @@
         // Settings for 'Advanced Collections'
         let settingsAdvancedCollections = document.createElement('div');
         let checkboxAdvancedCollections = document.createElement('input');
-        checkboxAdvancedCollections.type = "checkbox";
-        checkboxAdvancedCollections.id = "plus-advanced-collections";
+        checkboxAdvancedCollections.type = 'checkbox';
+        checkboxAdvancedCollections.id = 'plus-advanced-collections';
         //checkboxAdvancedCollections.checked = true; //TODO save and get value from local storage
         checkboxAdvancedCollections.className = 'plus-settings-checkbox';
         checkboxAdvancedCollections.onchange = function(){
@@ -182,8 +182,8 @@
         };
 
         let labelAdvancedCollections = document.createElement('label');
-        labelAdvancedCollections.htmlFor = "plus-advanced-collections";
-        labelAdvancedCollections.innerHTML = "Advanced Collections";
+        labelAdvancedCollections.htmlFor = 'plus-advanced-collections';
+        labelAdvancedCollections.innerHTML = 'Advanced Collections';
 
         settingsAdvancedCollections.appendChild(checkboxAdvancedCollections);
         settingsAdvancedCollections.appendChild(labelAdvancedCollections);
@@ -197,20 +197,6 @@
         body.appendChild(settingsButton);
         body.appendChild(settingsContainer);
 
-
-
-        //
-        //         <div className="aaa" style="position: absolute;display: inline-block;">
-        //         <input type="checkbox" name="download-all" value="true" className="download-all-checkbox">
-        //             <label htmlFor="download-all">
-        //                 Download All
-        //             </label>
-        //     </div>
-        //
-        //
-        // #248bfb
-
-        // #0063ce!important
     }
 
     function checkAndHideAds() {
@@ -549,7 +535,7 @@
     function downloadAllFiles() {
 
         let zip = new JSZip();
-        let imgFolder = zip.folder("images");
+        let imgFolder = zip.folder('images');
 
         let thing = JSON.parse(stripDoubleBackslashes(extractCurrentThing())).thing;
         let files = thing.files;
@@ -563,8 +549,8 @@
 
         images.forEach(image => {
             let largeImages = image.sizes.filter( el => {
-                return el.type=="display" &&
-                    el.size=="large";
+                return el.type==='display' &&
+                    el.size==='large';
             });
             let imageUrl = largeImages[0].url;
 
@@ -575,7 +561,7 @@
         let zipName = thing.id + ' - ' + thing.name;
         zipName = filenameValidator(zipName).fname;
 
-        zip.generateAsync({type: "blob"})
+        zip.generateAsync({type: 'blob'})
             .then(function (content) {
                 saveAs(content, zipName);
             });
@@ -603,7 +589,7 @@
     }
 
     function stripDoubleBackslashes (str) {
-        return (str + '').replace("\\", "");
+        return (str + '').replace('\\', '');
     }
 
     async function downloadFile(url) {
@@ -618,26 +604,26 @@
 
     function convertToValidFilename(str){
         return (str + '')
-            .replace(/\n/g," ")
-            .replace(/[<>:"/\\|?*\x00-\x1F]| +$/g,"")
-            .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/,x=>x+"_");
+            .replace(/\n/g,' ')
+            .replace(/[<>:"/\\|?*\x00-\x1F]| +$/g,'')
+            .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/,x=>x+'_');
     }
 
-    function filenameValidator(fname, { replacement = "�" } = {}) {
+    function filenameValidator(fname, { replacement = '�' } = {}) {
         // https://stackoverflow.com/a/31976060
         // https://gist.github.com/doctaphred/d01d05291546186941e1b7ddc02034d3
 
         const fname_original = fname;
 
         // resolve multi-line, whitespace trimming
-        fname = fname.split(/[\r\n]/).map(s => s.trim()).filter(s => s.length).join("  ");
+        fname = fname.split(/[\r\n]/).map(s => s.trim()).filter(s => s.length).join('  ');
 
         // forbidden characters
         // (after multi-line, because new-line-chars are themselves forbidden characters)
         fname = fname.replaceAll(/[<>:"\/\\\|?*\x00-\x1F]/g, replacement);
 
         // advanced trim
-        fname = fname.replace(/\.$/, "");
+        fname = fname.replace(/\.$/, '');
 
         // empty filename
         if (!fname.length) {
