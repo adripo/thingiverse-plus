@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.4.1
+// @version      0.5.0
 // @description  Thingiverse with improved functionality
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -22,18 +22,23 @@
 (function () {
     'use strict';
 
+    // Global variables
+    let cssHideAdsElement;
+
+    // Add Settings Button
+    addSettingsButton();
+
     // Hide ads
-    hideAds();
+    checkAndHideAds();
 
     // Advanced collections
-    advancedCollections();
+    checkAndEnableAdvancedCollections();
 
     const pathname = window.location.pathname;
     if (pathname.startsWith('/thing:')) {
-        // Show enable buttons
-
         // Set 6 elements per page in 'More'
         changeElementsPerPage(6);
+
         // Enable instant download button
         //instantDownload();
         downloadAllButton();
@@ -45,6 +50,190 @@
 
     /*** FUNCTIONS ***/
 
+    /* Settings Button */
+
+    function addSettingsButton() {
+        const buttonImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAABCCAYAAAAMlmvWAAAACXBIWXMAAC4jAAAuIwF4pT92AAAG2GlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNy4xLWMwMDAgNzkuZWRhMmIzZiwgMjAyMS8xMS8xNC0xMjozMDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIzLjEgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAyMi0wMS0wM1QwMzoxMzoyNCswMTowMCIgeG1wOk1vZGlmeURhdGU9IjIwMjItMDEtMDNUMDM6MjM6MDErMDE6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMjItMDEtMDNUMDM6MjM6MDErMDE6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6N2YzMWI3NWQtMDZiYy1jMzRhLWIyOGYtZTdlODA2NDc4YjRlIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6MmE0NjVlNzAtZDg4Ni04MTQzLThmYjItNTcyMWYxZjcyOTM0IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWNmYjU5ODctOTJjMi0xODQ4LWI4MzktNGU2YTEzMDA0M2I3Ij4gPHBob3Rvc2hvcDpUZXh0TGF5ZXJzPiA8cmRmOkJhZz4gPHJkZjpsaSBwaG90b3Nob3A6TGF5ZXJOYW1lPSIrIiBwaG90b3Nob3A6TGF5ZXJUZXh0PSIrIi8+IDwvcmRmOkJhZz4gPC9waG90b3Nob3A6VGV4dExheWVycz4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo1Y2ZiNTk4Ny05MmMyLTE4NDgtYjgzOS00ZTZhMTMwMDQzYjciIHN0RXZ0OndoZW49IjIwMjItMDEtMDNUMDM6MTM6MjQrMDE6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMy4xIChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY29udmVydGVkIiBzdEV2dDpwYXJhbWV0ZXJzPSJmcm9tIGFwcGxpY2F0aW9uL3ZuZC5hZG9iZS5waG90b3Nob3AgdG8gaW1hZ2UvcG5nIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo3ZjMxYjc1ZC0wNmJjLWMzNGEtYjI4Zi1lN2U4MDY0NzhiNGUiIHN0RXZ0OndoZW49IjIwMjItMDEtMDNUMDM6MjM6MDErMDE6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMy4xIChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBh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';
+
+        const cssPlusSettings =
+            `.plus-settings-button {
+                position: fixed;
+                z-index: 101;
+                bottom: 10px;
+                right: 10px;
+                border-radius: 3px;
+                padding: 5px;
+                background-color: #fff;
+            }
+            
+            .plus-settings-button img {
+                box-sizing: content-box;
+                max-width: 20px;
+                padding: 10px;
+                border-radius: 3px;
+                vertical-align: middle;
+                background-color: #248bfb;
+                cursor: pointer;
+            }
+            
+            .plus-settings-container {
+                position: fixed;
+                transition: max-height 0.3s, max-width 0.3s, visibility 0.3s, opacity 0.3s linear;
+                z-index: 101;
+                bottom: 70px;
+                right: 10px;
+                max-height: 100%;
+                max-width: 100%;
+                background-color: #248bfb;
+                overflow: hidden;
+                padding: 5px;
+                border-radius: 3px;
+                box-sizing: content-box;
+            }
+            
+            .plus-settings-hidden {
+                max-height: 0;
+                max-width: 0;
+                visibility: hidden;
+                opacity: 0;
+            }
+            
+            .plus-settings-container>div {
+                background-color: #f5f5f5;
+                padding: 10px;
+                border-radius: 3px;
+            }
+            
+            .plus-settings-container>div:not(:last-child) {
+                margin-bottom: 5px;
+            }
+            
+            .plus-settings-checkbox {
+                vertical-align: middle;
+                width: 32px;
+                height: 32px;
+                margin: 0;
+                cursor: pointer;
+            }
+            
+            .plus-settings-checkbox+label {
+                display: inline-block;
+                vertical-align: middle;
+                color: #555;
+                opacity: 1;
+                font-size: 16px;
+                margin: 0 10px 0 10px;
+                line-height: 32px;
+                cursor: pointer;
+                font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
+            }`;
+
+        // ThingiversePlus-logo div
+        let settingsButton = document.createElement('div');
+        settingsButton.className = 'plus-settings-button';
+
+        // ThingiversePlus-logo image
+        let img = document.createElement('img');
+        img.src = buttonImage;
+        img.alt = "ThingiversePlus-logo"
+
+        img.onclick = function(){
+            let settingsContainer = document.querySelector('.plus-settings-container');
+            settingsContainer.classList.toggle("plus-settings-hidden");
+        };
+
+        settingsButton.appendChild(img);
+
+
+        // ThingiversePlus settings div
+        let settingsContainer = document.createElement('div');
+        settingsContainer.classList.add('plus-settings-container')
+        settingsContainer.classList.add('plus-hidden');
+
+        // Settings for 'Hide Ads'
+        let settingsHideAds = document.createElement('div');
+        let checkboxHideAds = document.createElement('input');
+        checkboxHideAds.type = "checkbox";
+        checkboxHideAds.id = "plus-hide-ads";
+        //checkboxHideAds.checked = true; //TODO save and get value from local storage
+        checkboxHideAds.className = 'plus-settings-checkbox';
+        checkboxHideAds.onchange = function(){
+            checkAndHideAds();
+        };
+
+        let labelHideAds = document.createElement('label');
+        labelHideAds.htmlFor = "plus-hide-ads";
+        labelHideAds.innerHTML = "Hide Ads";
+
+        settingsHideAds.appendChild(checkboxHideAds);
+        settingsHideAds.appendChild(labelHideAds);
+
+        settingsContainer.appendChild(settingsHideAds);
+
+        // Settings for 'Advanced Collections'
+        let settingsAdvancedCollections = document.createElement('div');
+        let checkboxAdvancedCollections = document.createElement('input');
+        checkboxAdvancedCollections.type = "checkbox";
+        checkboxAdvancedCollections.id = "plus-advanced-collections";
+        //checkboxAdvancedCollections.checked = true; //TODO save and get value from local storage
+        checkboxAdvancedCollections.className = 'plus-settings-checkbox';
+        checkboxAdvancedCollections.onchange = function(){
+            checkAndEnableAdvancedCollections();
+        };
+
+        let labelAdvancedCollections = document.createElement('label');
+        labelAdvancedCollections.htmlFor = "plus-advanced-collections";
+        labelAdvancedCollections.innerHTML = "Advanced Collections";
+
+        settingsAdvancedCollections.appendChild(checkboxAdvancedCollections);
+        settingsAdvancedCollections.appendChild(labelAdvancedCollections);
+
+        settingsContainer.appendChild(settingsAdvancedCollections);
+
+        // Append to body
+        let body = document.body;
+
+        GM_addStyle(cssPlusSettings);
+        body.appendChild(settingsButton);
+        body.appendChild(settingsContainer);
+
+
+
+        //
+        //         <div className="aaa" style="position: absolute;display: inline-block;">
+        //         <input type="checkbox" name="download-all" value="true" className="download-all-checkbox">
+        //             <label htmlFor="download-all">
+        //                 Download All
+        //             </label>
+        //     </div>
+        //
+        //
+        // #248bfb
+
+        // #0063ce!important
+    }
+
+    function checkAndHideAds() {
+        let checkboxHideAds = document.getElementById('plus-hide-ads');
+        if (checkboxHideAds.checked === true) {
+            hideAds();
+        }
+        else {
+            unhideAds();
+        }
+    }
+
+    function checkAndEnableAdvancedCollections() {
+        let checkboxAdvancedCollections = document.getElementById('plus-advanced-collections');
+        if (checkboxAdvancedCollections.checked === true) {
+            enableAdvancedCollections();
+        }
+        else {
+            //unhideAds(); //TODO refresh??
+        }
+    }
+
+
     /* Hide Ads */
 
     function hideAds() {
@@ -53,7 +242,13 @@
                 display: none !important; 
             }`;
 
-        GM_addStyle(cssHideAds);
+        cssHideAdsElement = GM_addStyle(cssHideAds);
+    }
+
+    function unhideAds() {
+        if (cssHideAdsElement) {
+            cssHideAdsElement.remove();
+        }
     }
 
 
@@ -179,7 +374,7 @@
 
     /* Advanced Collections */
 
-    function advancedCollections() {
+    function enableAdvancedCollections() {
 
         const bearer = extractBearer();
 
@@ -460,8 +655,6 @@
         };
     }
 
-
-    
     /*** ***/
 
 })();
