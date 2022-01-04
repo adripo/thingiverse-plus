@@ -333,8 +333,8 @@
     function appendPerPageSelect() {
         const availablePerPageValues = [20, 30, 60, 100, 200];
 
-        // Get previously saved value for per_page
-        const elementsPerPage = GM_getValue('per_page', 20);
+        // Get previously saved value for elements_per_page
+        const elementsPerPage = GM_getValue('elements_per_page', 20);
         // Change value of elements per page to load
         changeElementsPerPage(elementsPerPage);
 
@@ -392,7 +392,7 @@
         perPageSelectEl.addEventListener('change', (event) => {
             const newPerPageValue = parseInt(event.target.value);
             if (availablePerPageValues.includes(newPerPageValue)) {
-                GM_setValue('per_page', newPerPageValue);
+                GM_setValue('elements_per_page', newPerPageValue);
             }
             window.location.reload(false);
         });
