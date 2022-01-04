@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.5.0
-// @description  Thingiverse with improved functionality
+// @version      0.5.2
+// @description  Thingiverse with extra features
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
 // @icon         https://www.thingiverse.com/favicon.ico
@@ -147,7 +147,7 @@
         // ThingiversePlus settings div
         let settingsContainer = document.createElement('div');
         settingsContainer.classList.add('plus-settings-container')
-        settingsContainer.classList.add('plus-hidden');
+        settingsContainer.classList.add('plus-settings-hidden');
 
 
         // Settings for 'Hide Ads'
@@ -155,7 +155,10 @@
         let checkboxHideAds = document.createElement('input');
         checkboxHideAds.type = 'checkbox';
         checkboxHideAds.id = 'plus-hide-ads';
-        //checkboxHideAds.checked = true; //TODO save and get value from local storage
+
+        // Get previously saved value for 'checkbox_hide_ads'
+        const checkboxHideAdsStatus = GM_getValue('checkbox_hide_ads', false);
+        checkboxHideAds.checked = !!checkboxHideAdsStatus;
         checkboxHideAds.className = 'plus-settings-checkbox';
         checkboxHideAds.onchange = function(){
             checkAndHideAds();
@@ -176,7 +179,10 @@
         let checkboxAdvancedCollections = document.createElement('input');
         checkboxAdvancedCollections.type = 'checkbox';
         checkboxAdvancedCollections.id = 'plus-advanced-collections';
-        //checkboxAdvancedCollections.checked = true; //TODO save and get value from local storage
+
+        // Get previously saved value for 'checkbox_advanced_collections'
+        const checkboxAdvancedCollectionsStatus = GM_getValue('checkbox_advanced_collections', false);
+        checkboxAdvancedCollections.checked = !!checkboxAdvancedCollectionsStatus;
         checkboxAdvancedCollections.className = 'plus-settings-checkbox';
         checkboxAdvancedCollections.onchange = function(){
             checkAndEnableAdvancedCollections();
@@ -204,9 +210,15 @@
     function checkAndHideAds() {
         let checkboxHideAds = document.getElementById('plus-hide-ads');
         if (checkboxHideAds.checked === true) {
+            // save value for 'checkbox_hide_ads'
+            GM_setValue('checkbox_hide_ads', true);
+
             hideAds();
         }
         else {
+            // save value for 'checkbox_hide_ads'
+            GM_setValue('checkbox_hide_ads', false);
+
             unhideAds();
         }
     }
@@ -214,10 +226,21 @@
     function checkAndEnableAdvancedCollections() {
         let checkboxAdvancedCollections = document.getElementById('plus-advanced-collections');
         if (checkboxAdvancedCollections.checked === true) {
+            // save value for 'checkbox_advanced_collections'
+            GM_setValue('checkbox_advanced_collections', true);
+
             enableAdvancedCollections();
         }
         else {
-            location.reload();
+            const checkboxAdvancedCollectionsStatus = GM_getValue('checkbox_advanced_collections', false);
+
+            // save value for 'checkbox_advanced_collections'
+            GM_setValue('checkbox_advanced_collections', false);
+
+            // check last status and reload if changed //TODO find better alternative
+            if (!!checkboxAdvancedCollectionsStatus) {
+                window.location.reload(false);
+            }
         }
     }
 
