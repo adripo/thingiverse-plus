@@ -36,11 +36,11 @@
 
     const pathname = window.location.pathname;
     if (pathname.startsWith('/thing:')) {
-        // Set 6 elements per page in 'More'
+        // Set 6 elements per page in 'More' section
         changeElementsPerPage(6);
 
         // Enable 'Download All Files' button
-        downloadAllButton();
+        downloadAllFilesButton();
     } else if (pathname == '/' || pathname == '/search') {
         // Append elements per page selector
         appendPerPageSelect();
@@ -149,6 +149,7 @@
         settingsContainer.classList.add('plus-settings-container')
         settingsContainer.classList.add('plus-hidden');
 
+
         // Settings for 'Hide Ads'
         let settingsHideAds = document.createElement('div');
         let checkboxHideAds = document.createElement('input');
@@ -169,6 +170,7 @@
 
         settingsContainer.appendChild(settingsHideAds);
 
+
         // Settings for 'Advanced Collections'
         let settingsAdvancedCollections = document.createElement('div');
         let checkboxAdvancedCollections = document.createElement('input');
@@ -188,6 +190,7 @@
         settingsAdvancedCollections.appendChild(labelAdvancedCollections);
 
         settingsContainer.appendChild(settingsAdvancedCollections);
+
 
         // Append to body
         let body = document.body;
@@ -214,7 +217,7 @@
             enableAdvancedCollections();
         }
         else {
-            //unhideAds(); //TODO refresh??
+            location.reload();
         }
     }
 
@@ -571,7 +574,7 @@
             });
     }
 
-    function downloadAllButton() {
+    function downloadAllFilesButton() {
 
         const cssDownloadAllFiles =
             `.wait {
