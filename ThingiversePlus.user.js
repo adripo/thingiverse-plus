@@ -40,7 +40,6 @@
         changeElementsPerPage(6);
 
         // Enable 'Download All Files' button
-        //instantDownload();
         downloadAllButton();
     } else if (pathname == '/' || pathname == '/search') {
         // Append elements per page selector
@@ -225,7 +224,7 @@
     function hideAds() {
         const cssHideAds =
             `div[class^='AdCard__'] {
-                display: none !important; 
+                display: none !important;
             }`;
 
         cssHideAdsElement = GM_addStyle(cssHideAds);
@@ -533,6 +532,8 @@
     /* Download All Files */
 
     function downloadAllFiles() {
+        // set cursor to wait
+        document.body.classList.add('wait');
 
         let zip = new JSZip();
         let imgFolder = zip.folder('images');
@@ -564,10 +565,21 @@
         zip.generateAsync({type: 'blob'})
             .then(function (content) {
                 saveAs(content, zipName);
+
+                // set cursor back to normal (remove wait)
+                document.body.classList.remove('wait');
             });
     }
 
     function downloadAllButton() {
+
+        const cssDownloadAllFiles =
+            `.wait {
+                cursor: wait;
+            }`;
+        GM_addStyle(cssDownloadAllFiles);
+
+
 
         const sidebarMenuBtnSelector = 'a[class^="SidebarMenu__download--"]';
 
