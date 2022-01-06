@@ -150,53 +150,14 @@
         settingsContainer.classList.add('plus-settings-hidden');
 
 
-        // Settings for 'Hide Ads'
-        let settingsHideAds = document.createElement('div');
-        let checkboxHideAds = document.createElement('input');
-        checkboxHideAds.type = 'checkbox';
-        checkboxHideAds.id = 'plus-hide-ads';
-
-        // Get previously saved value for 'checkbox_hide_ads'
-        const checkboxHideAdsStatus = GM_getValue('checkbox_hide_ads', false);
-        checkboxHideAds.checked = !!checkboxHideAdsStatus;
-        checkboxHideAds.className = 'plus-settings-checkbox';
-        checkboxHideAds.onchange = function(){
-            checkAndHideAds();
-        };
-
-        let labelHideAds = document.createElement('label');
-        labelHideAds.htmlFor = 'plus-hide-ads';
-        labelHideAds.innerHTML = 'Hide Ads';
-
-        settingsHideAds.appendChild(checkboxHideAds);
-        settingsHideAds.appendChild(labelHideAds);
-
+        let settingsHideAds = createSettingsElement('hide-ads', 'Hide Ads', checkAndHideAds);
         settingsContainer.appendChild(settingsHideAds);
 
-
-        // Settings for 'Advanced Collections'
-        let settingsAdvancedCollections = document.createElement('div');
-        let checkboxAdvancedCollections = document.createElement('input');
-        checkboxAdvancedCollections.type = 'checkbox';
-        checkboxAdvancedCollections.id = 'plus-advanced-collections';
-
-        // Get previously saved value for 'checkbox_advanced_collections'
-        const checkboxAdvancedCollectionsStatus = GM_getValue('checkbox_advanced_collections', false);
-        checkboxAdvancedCollections.checked = !!checkboxAdvancedCollectionsStatus;
-        checkboxAdvancedCollections.className = 'plus-settings-checkbox';
-        checkboxAdvancedCollections.onchange = function(){
-            checkAndEnableAdvancedCollections();
-        };
-
-        let labelAdvancedCollections = document.createElement('label');
-        labelAdvancedCollections.htmlFor = 'plus-advanced-collections';
-        labelAdvancedCollections.innerHTML = 'Advanced Collections';
-
-        settingsAdvancedCollections.appendChild(checkboxAdvancedCollections);
-        settingsAdvancedCollections.appendChild(labelAdvancedCollections);
-
+        let settingsAdvancedCollections = createSettingsElement('advanced-collections', 'Advanced Collections', checkAndEnableAdvancedCollections);
         settingsContainer.appendChild(settingsAdvancedCollections);
 
+        let settingsElementsPerPage = createSettingsElement('elements-per-page', 'Elements Per Page Selector', checkAndEnableElementsPerPage);
+        settingsContainer.appendChild(settingsElementsPerPage);
 
         // Append to body
         let body = document.body;
@@ -206,6 +167,30 @@
         body.appendChild(settingsContainer);
         closeContainerListener();
 
+    }
+
+    function createSettingsElement(name, description, onChangeFunction) {
+        let settingsElement = document.createElement('div');
+        let checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'plus-checkbox-' + name;
+        checkbox.className = 'plus-settings-checkbox';
+        checkbox.onchange = function(){
+            onChangeFunction();
+        };
+
+        // Get previously saved value
+        const checkboxSavedStatus = GM_getValue('checkbox_' + name, false);
+        checkbox.checked = !!checkboxSavedStatus;
+
+        let label = document.createElement('label');
+        label.htmlFor = checkbox.id;
+        label.innerHTML = description;
+
+        settingsElement.appendChild(checkbox);
+        settingsElement.appendChild(label);
+
+        return settingsElement;
     }
 
     function closeContainerListener() {
@@ -224,7 +209,7 @@
     }
 
     function checkAndHideAds() {
-        let checkboxHideAds = document.getElementById('plus-hide-ads');
+        let checkboxHideAds = document.getElementById('plus-checkbox-hide-ads');
         if (checkboxHideAds.checked === true) {
             // save value for 'checkbox_hide_ads'
             GM_setValue('checkbox_hide_ads', true);
@@ -240,7 +225,7 @@
     }
 
     function checkAndEnableAdvancedCollections() {
-        let checkboxAdvancedCollections = document.getElementById('plus-advanced-collections');
+        let checkboxAdvancedCollections = document.getElementById('plus-checkbox-advanced-collections');
         if (checkboxAdvancedCollections.checked === true) {
             // save value for 'checkbox_advanced_collections'
             GM_setValue('checkbox_advanced_collections', true);
@@ -260,6 +245,21 @@
         }
     }
 
+    function checkAndEnableElementsPerPage() {
+        let checkboxElementsPerPageSelector = document.getElementById('plus-checkbox-elements-per-page-selector');
+        if (checkboxElementsPerPageSelector.checked === true) {
+            // save value for 'checkbox_elements_per_page_selector'
+            GM_setValue('checkbox_elements_per_page_selector', true);
+
+            //hideAds();
+        }
+        else {
+            // save value for 'checkbox_elements_per_page_selector'
+            GM_setValue('checkbox_elements_per_page_selector', false);
+
+            //unhideAds();
+        }
+    }
 
     /* Hide Ads */
 
@@ -396,20 +396,18 @@
         });
 
         // Generate html
-        const perPageSelectId = 'plus-elements-per-page';
-
         let htmlElementsPerPage = document.createElement('div');
         htmlElementsPerPage.className = 'plus-elements-per-page';
 
-        let label = document.createElement('label');
-        label.htmlFor = perPageSelectId;
-        label.innerHTML = "Elements per page:";
-
         let select = document.createElement('select');
-        select.id = perPageSelectId;
+        select.id = 'plus-elements-per-page';
         availableOptions.forEach(option => {
             select.add(option);
         });
+
+        let label = document.createElement('label');
+        label.htmlFor = select.id;
+        label.innerHTML = "Elements per page:";
 
         htmlElementsPerPage.appendChild(label);
         htmlElementsPerPage.appendChild(select);
