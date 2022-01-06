@@ -340,27 +340,28 @@
 
         // Generate CSS
         const cssElementsPerPage =
-            `.ElementsPerPage-plus {
+            `.plus-elements-per-page {
                 display: inline-block;
                 position: relative;
                 background-color: #fff;
                 width: 300px;
                 margin-bottom: 10px;
+                margin-right: 20px;
             }
 
-            .ElementsPerPage-plus > label {
+            .plus-elements-per-page > label {
                 display: inline-block;
                 width: 190px;
                 margin-left: 10px;
             }
 
-            .ElementsPerPage-plus > select {
+            .plus-elements-per-page > select {
                 width: 100px;
                 height: 30px;
             }
 
-            div[class^='FilterBySort__dropdown--'] {
-                margin-right: 20px;
+            div[class^='Sort__dropdown--'] {
+                margin-left: 0px;
             }`;
 
         // Generate options from given values
@@ -371,7 +372,7 @@
 
         // Generate html
         let htmlElementsPerPage = document.createElement('div');
-        htmlElementsPerPage.className = 'ElementsPerPage-plus';
+        htmlElementsPerPage.className = 'plus-elements-per-page';
         const perPageSelectId = 'elPerPage';
         htmlElementsPerPage.innerHTML =
             `<label for="` + perPageSelectId + `">Elements per page:</label><select id="` + perPageSelectId + `">
@@ -384,7 +385,7 @@
         // Add html
         const filterBySortSelector = 'div[class^="FilterBySort__dropdown--"]';
         waitForKeyElements(filterBySortSelector, (filterBySortDiv) => {
-            filterBySortDiv.parentNode.insertBefore(htmlElementsPerPage, filterBySortDiv.nextSibling);
+            filterBySortDiv.parentNode.prepend(htmlElementsPerPage);
         });
 
         // Create event onChange
@@ -403,10 +404,20 @@
 
     function enableAdvancedCollections() {
 
+        let collections = extractCollections();
+        console.log(collections);
+
+        collections.forEach(collection => {
+            console.log(collection);
+        });
+
+
         const bearer = extractBearer();
 
         if (bearer) {
             const username = extractUsername();
+
+            //TODO wait
 
             getCollections(username, bearer)
                 .then(collectionsList => {
@@ -509,6 +520,7 @@
                         // Append created span with button after current select
                         selectEl.after(plusButtonSpan);
                     });
+                    //TODO wait end
                 })
                 .catch((error) => {
                     console.error('Error:', error);
@@ -516,6 +528,14 @@
         }
     }
 
+    function extractCollections() {
+        try {
+            return JSON.parse(
+                stripBackslashes(JSON.parse(window.localStorage['persist:root']).collections)).userData;
+        } catch (e) {
+            return null;
+        }
+    }
 
     function extractBearer() {
         try {
@@ -580,7 +600,7 @@
         let zip = new JSZip();
         let imgFolder = zip.folder('images');
 
-        let thing = JSON.parse(stripDoubleBackslashes(extractCurrentThing())).thing;
+        let thing = JSON.parse(stripBackslashes(extractCurrentThing())).thing;
         let files = thing.files;
 
         files.forEach(file => {
@@ -642,7 +662,7 @@
         }
     }
 
-    function stripDoubleBackslashes (str) {
+    function stripBackslashes(str) {
         return (str + '').replace('\\', '');
     }
 
