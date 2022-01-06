@@ -352,7 +352,7 @@
 
             .plus-elements-per-page > label {
                 display: inline-block;
-                width: 200px;
+                width: 210px;
                 margin-left: 10px;
                 font-size: 12px;
                 color: #555;
@@ -360,7 +360,7 @@
             }
 
             .plus-elements-per-page > select {
-                width: 90px;
+                width: 80px;
                 height: 30px;
                 cursor: pointer;
                 border: 0;
@@ -385,19 +385,34 @@
 
 
         // Generate options from given values
-        let availableOptions = '';
-        availablePerPageValues.forEach(value => { //TODO create elements instead of direct text
-            availableOptions += '<option value="' + value + '"' + ((elementsPerPage == value) && " selected") + '>' + value + '</option>\n';
+        let availableOptions = new Array();
+        availablePerPageValues.forEach(value => {
+            let option = document.createElement('option');
+            option.value = value;
+            option.selected = elementsPerPage === value;
+            option.innerHTML = value;
+
+            availableOptions.push(option);
         });
 
         // Generate html
+        const perPageSelectId = 'plus-elements-per-page';
+
         let htmlElementsPerPage = document.createElement('div');
         htmlElementsPerPage.className = 'plus-elements-per-page';
-        const perPageSelectId = 'elPerPage';
-        htmlElementsPerPage.innerHTML =
-            `<label for="` + perPageSelectId + `">Elements per page:</label><select id="` + perPageSelectId + `">
-                ` + availableOptions + `
-            </select>`;
+
+        let label = document.createElement('label');
+        label.htmlFor = perPageSelectId;
+        label.innerHTML = "Elements per page:";
+
+        let select = document.createElement('select');
+        select.id = perPageSelectId;
+        availableOptions.forEach(option => {
+            select.add(option);
+        });
+
+        htmlElementsPerPage.appendChild(label);
+        htmlElementsPerPage.appendChild(select);
 
         // Add CSS
         GM_addStyle(cssElementsPerPage);
