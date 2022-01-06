@@ -330,7 +330,7 @@
 
     /* Append Per Page Select */
 
-    function appendPerPageSelect() {
+    function appendPerPageSelect(position = "left") {
         const availablePerPageValues = [20, 30, 60, 100, 200];
 
         // Get previously saved value for elements_per_page
@@ -347,22 +347,42 @@
                 width: 300px;
                 margin-bottom: 10px;
                 margin-right: 20px;
+                vertical-align: top;
             }
 
             .plus-elements-per-page > label {
                 display: inline-block;
-                width: 190px;
+                width: 200px;
                 margin-left: 10px;
+                font-size: 12px;
+                color: #555;
+                text-align: left;
             }
 
             .plus-elements-per-page > select {
-                width: 100px;
+                width: 90px;
                 height: 30px;
-            }
+                cursor: pointer;
+                border: 0;
+                border-left: 1px solid rgba(85, 85, 85, .8);
+                color: #555;
+                opacity: 0.8;
+            }`;
 
-            div[class^='Sort__dropdown--'] {
+        const cssElementsPerPageExtraLeft =
+            `div[class^='Sort__dropdown--'] {
                 margin-left: 0px;
             }`;
+
+        const cssElementsPerPageExtraRight =
+            `div[class^='FilterBySort__dropdown--'] {
+                margin-right: 20px;
+            }
+            
+            .plus-elements-per-page {
+                margin-right: 0;
+            }`;
+
 
         // Generate options from given values
         let availableOptions = '';
@@ -385,7 +405,18 @@
         // Add html
         const filterBySortSelector = 'div[class^="FilterBySort__dropdown--"]';
         waitForKeyElements(filterBySortSelector, (filterBySortDiv) => {
-            filterBySortDiv.parentNode.prepend(htmlElementsPerPage);
+            if (position === "left") {
+                // Add Extra CSS
+                GM_addStyle(cssElementsPerPageExtraLeft);
+                // Adde html
+                filterBySortDiv.parentNode.prepend(htmlElementsPerPage);
+            }
+            else if (position === "right") {
+                // Add Extra CSS
+                GM_addStyle(cssElementsPerPageExtraRight);
+                // Adde html
+                filterBySortDiv.parentNode.append(htmlElementsPerPage);
+            }
         });
 
         // Create event onChange
