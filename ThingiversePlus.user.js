@@ -24,36 +24,48 @@
 
     // Global variables
     let cssHideAdsElement;
+    const elNameHideAds = 'hide-ads';
+    const elNameAdvancedCollections = 'advanced-collections';
+    const elNameElementsPerPage = 'elements-per-page';
 
-    // Add Settings Button
-    addSettingsButton();
-
-    // Hide ads
-    checkAndHideAds();
-
-    // Enable Advanced collections
-    checkAndEnableAdvancedCollections();
-
-    const pathname = window.location.pathname;
-    if (pathname.startsWith('/thing:')) {
-        // Set 6 elements per page in 'More' section
-        changeElementsPerPage(6);
-
-        // Enable 'Download All Files' button
-        downloadAllFilesButton();
-    } else if (pathname == '/' || pathname == '/search') {
-        // Append elements per page selector
-        appendPerPageSelect();
-    }
-
+    // Start-up
+    setup();
 
     /*** FUNCTIONS ***/
 
+    /* Setup */
+
+    function setup() {
+        // Add ThingiversePlus Settings Button
+        addPlusSettings();
+
+        // Enable Hide Ads
+        checkAndHideAds();
+
+        // Enable Advanced Collections
+        checkAndEnableAdvancedCollections();
+
+        const pathname = window.location.pathname;
+        if (pathname.startsWith('/thing:')) {
+            // Set 6 elements per page in 'More' section
+            changeElementsPerPage(6);
+
+            // Enable 'Download All Files' button
+            downloadAllFilesButton();
+        } else if (pathname === '/' || pathname === '/search') {
+            // Enable Elements Per Page Selector
+            checkAndEnableElementsPerPage();
+        }
+    }
     /* Settings Button */
 
-    function addSettingsButton() {
-        const buttonImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAABCCAYAAAAMlmvWAAAACXBIWXMAAC4jAAAuIwF4pT92AAAG2GlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNy4xLWMwMDAgNzkuZWRhMmIzZiwgMjAyMS8xMS8xNC0xMjozMDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIzLjEgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAyMi0wMS0wM1QwMzoxMzoyNCswMTowMCIgeG1wOk1vZGlmeURhdGU9IjIwMjItMDEtMDNUMDM6MjM6MDErMDE6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMjItMDEtMDNUMDM6MjM6MDErMDE6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6N2YzMWI3NWQtMDZiYy1jMzRhLWIyOGYtZTdlODA2NDc4YjRlIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6MmE0NjVlNzAtZDg4Ni04MTQzLThmYjItNTcyMWYxZjcyOTM0IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWNmYjU5ODctOTJjMi0xODQ4LWI4MzktNGU2YTEzMDA0M2I3Ij4gPHBob3Rvc2hvcDpUZXh0TGF5ZXJzPiA8cmRmOkJhZz4gPHJkZjpsaSBwaG90b3Nob3A6TGF5ZXJOYW1lPSIrIiBwaG90b3Nob3A6TGF5ZXJUZXh0PSIrIi8+IDwvcmRmOkJhZz4gPC9waG90b3Nob3A6VGV4dExheWVycz4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo1Y2ZiNTk4Ny05MmMyLTE4NDgtYjgzOS00ZTZhMTMwMDQzYjciIHN0RXZ0OndoZW49IjIwMjItMDEtMDNUMDM6MTM6MjQrMDE6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMy4xIChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY29udmVydGVkIiBzdEV2dDpwYXJhbWV0ZXJzPSJmcm9tIGFwcGxpY2F0aW9uL3ZuZC5hZG9iZS5waG90b3Nob3AgdG8gaW1hZ2UvcG5nIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo3ZjMxYjc1ZC0wNmJjLWMzNGEtYjI4Zi1lN2U4MDY0NzhiNGUiIHN0RXZ0OndoZW49IjIwMjItMDEtMDNUMDM6MjM6MDErMDE6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMy4xIChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBh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';
+    function addPlusSettings() {
+        createSettingsCSS();
+        createSettingsButton();
+        createSettingsContainer();
+    }
 
+    function createSettingsCSS() {
         const cssPlusSettings =
             `.plus-settings-button {
                 position: fixed;
@@ -127,11 +139,15 @@
                 font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
             }`;
 
-        // ThingiversePlus-logo div
+        GM_addStyle(cssPlusSettings);
+    }
+
+    function createSettingsButton() {
+        const buttonImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAABCCAYAAAAMlmvWAAAACXBIWXMAAC4jAAAuIwF4pT92AAAG2GlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNy4xLWMwMDAgNzkuZWRhMmIzZiwgMjAyMS8xMS8xNC0xMjozMDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIzLjEgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAyMi0wMS0wM1QwMzoxMzoyNCswMTowMCIgeG1wOk1vZGlmeURhdGU9IjIwMjItMDEtMDNUMDM6MjM6MDErMDE6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMjItMDEtMDNUMDM6MjM6MDErMDE6MDAiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0ic1JHQiBJRUM2MTk2Ni0yLjEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6N2YzMWI3NWQtMDZiYy1jMzRhLWIyOGYtZTdlODA2NDc4YjRlIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6MmE0NjVlNzAtZDg4Ni04MTQzLThmYjItNTcyMWYxZjcyOTM0IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NWNmYjU5ODctOTJjMi0xODQ4LWI4MzktNGU2YTEzMDA0M2I3Ij4gPHBob3Rvc2hvcDpUZXh0TGF5ZXJzPiA8cmRmOkJhZz4gPHJkZjpsaSBwaG90b3Nob3A6TGF5ZXJOYW1lPSIrIiBwaG90b3Nob3A6TGF5ZXJUZXh0PSIrIi8+IDwvcmRmOkJhZz4gPC9waG90b3Nob3A6VGV4dExheWVycz4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo1Y2ZiNTk4Ny05MmMyLTE4NDgtYjgzOS00ZTZhMTMwMDQzYjciIHN0RXZ0OndoZW49IjIwMjItMDEtMDNUMDM6MTM6MjQrMDE6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMy4xIChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY29udmVydGVkIiBzdEV2dDpwYXJhbWV0ZXJzPSJmcm9tIGFwcGxpY2F0aW9uL3ZuZC5hZG9iZS5waG90b3Nob3AgdG8gaW1hZ2UvcG5nIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo3ZjMxYjc1ZC0wNmJjLWMzNGEtYjI4Zi1lN2U4MDY0NzhiNGUiIHN0RXZ0OndoZW49IjIwMjItMDEtMDNUMDM6MjM6MDErMDE6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMy4xIChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBh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';
+
         let settingsButton = document.createElement('div');
         settingsButton.className = 'plus-settings-button';
 
-        // ThingiversePlus-logo image
         let img = document.createElement('img');
         img.src = buttonImage;
         img.alt = 'ThingiversePlus-logo';
@@ -143,30 +159,44 @@
 
         settingsButton.appendChild(img);
 
+        document.body.appendChild(settingsButton);
+    }
 
-        // ThingiversePlus settings div
+    function createSettingsContainer() {
         let settingsContainer = document.createElement('div');
         settingsContainer.classList.add('plus-settings-container')
         settingsContainer.classList.add('plus-settings-hidden');
 
-
-        let settingsHideAds = createSettingsElement('hide-ads', 'Hide Ads', checkAndHideAds);
-        settingsContainer.appendChild(settingsHideAds);
-
-        let settingsAdvancedCollections = createSettingsElement('advanced-collections', 'Advanced Collections', checkAndEnableAdvancedCollections);
-        settingsContainer.appendChild(settingsAdvancedCollections);
-
-        let settingsElementsPerPage = createSettingsElement('elements-per-page', 'Elements Per Page Selector', checkAndEnableElementsPerPage);
+        // Elements Per Page
+        let settingsElementsPerPage = createSettingsElement(elNameElementsPerPage, 'Elements Per Page Selector', checkAndEnableElementsPerPage);
         settingsContainer.appendChild(settingsElementsPerPage);
 
-        // Append to body
-        let body = document.body;
+        // Advanced Collections
+        let settingsAdvancedCollections = createSettingsElement(elNameAdvancedCollections, 'Advanced Collections', checkAndEnableAdvancedCollections);
+        settingsContainer.appendChild(settingsAdvancedCollections);
 
-        GM_addStyle(cssPlusSettings);
-        body.appendChild(settingsButton);
-        body.appendChild(settingsContainer);
-        closeContainerListener();
+        // Hide Ads
+        let settingsHideAds = createSettingsElement(elNameHideAds, 'Hide Ads', checkAndHideAds);
+        settingsContainer.appendChild(settingsHideAds);
 
+        document.body.appendChild(settingsContainer);
+
+        addCloseContainerListener();
+    }
+
+    function addCloseContainerListener() {
+        window.addEventListener('click', function(e){
+            let settingsContainer = document.querySelector('.plus-settings-container');
+            const settingsButton = document.querySelector('.plus-settings-button');
+
+            // if Settings Container is visible and click outside of Settings Button and outside the Settings Container
+            if (!settingsContainer.classList.contains('plus-settings-hidden') &&
+                !settingsButton.contains(e.target) &&
+                !settingsContainer.contains(e.target)
+            ){
+                settingsContainer.classList.add('plus-settings-hidden');
+            }
+        });
     }
 
     function createSettingsElement(name, description, onChangeFunction) {
@@ -193,69 +223,48 @@
         return settingsElement;
     }
 
-    function closeContainerListener() {
-        window.addEventListener('click', function(e){
-            let settingsContainer = document.querySelector('.plus-settings-container');
-            let settingsButton = document.querySelector('.plus-settings-button');
-
-            // if Settings Container is visible and click outside of settings button and outside the container
-            if (!settingsContainer.classList.contains('plus-settings-hidden') &&
-                !settingsButton.contains(e.target) &&
-                !settingsContainer.contains(e.target)
-            ){
-                settingsContainer.classList.add('plus-settings-hidden');
-            }
-        });
-    }
-
     function checkAndHideAds() {
-        let checkboxHideAds = document.getElementById('plus-checkbox-hide-ads');
+        let checkboxHideAds = document.getElementById('plus-checkbox-' + elNameHideAds);
         if (checkboxHideAds.checked === true) {
-            // save value for 'checkbox_hide_ads'
-            GM_setValue('checkbox_hide_ads', true);
+            GM_setValue('checkbox_' + elNameHideAds, true);
 
             hideAds();
         }
         else {
-            // save value for 'checkbox_hide_ads'
-            GM_setValue('checkbox_hide_ads', false);
+            GM_setValue('checkbox_' + elNameHideAds, false);
 
             unhideAds();
         }
     }
 
     function checkAndEnableAdvancedCollections() {
-        let checkboxAdvancedCollections = document.getElementById('plus-checkbox-advanced-collections');
+        let checkboxAdvancedCollections = document.getElementById('plus-checkbox-' + elNameAdvancedCollections);
         if (checkboxAdvancedCollections.checked === true) {
-            // save value for 'checkbox_advanced_collections'
-            GM_setValue('checkbox_advanced_collections', true);
+            GM_setValue('checkbox_' + elNameAdvancedCollections, true);
 
             enableAdvancedCollections();
         }
         else {
-            const checkboxAdvancedCollectionsStatus = GM_getValue('checkbox_advanced_collections', false);
+            const checkboxLastStatus = GM_getValue('checkbox_' + elNameAdvancedCollections, false);
 
-            // save value for 'checkbox_advanced_collections'
-            GM_setValue('checkbox_advanced_collections', false);
+            GM_setValue('checkbox_' + elNameAdvancedCollections, false);
 
-            // check last status and reload if changed //TODO find better alternative
-            if (!!checkboxAdvancedCollectionsStatus) {
+            // check last status and reload if changed
+            if (!!checkboxLastStatus) {
                 window.location.reload(false);
             }
         }
     }
 
     function checkAndEnableElementsPerPage() {
-        let checkboxElementsPerPageSelector = document.getElementById('plus-checkbox-elements-per-page-selector');
+        let checkboxElementsPerPageSelector = document.getElementById('plus-checkbox-' + elNameElementsPerPage);
         if (checkboxElementsPerPageSelector.checked === true) {
-            // save value for 'checkbox_elements_per_page_selector'
-            GM_setValue('checkbox_elements_per_page_selector', true);
+            GM_setValue('checkbox_' + elNameElementsPerPage, true);
 
-            //hideAds();
+            enablePerPageSelect();
         }
         else {
-            // save value for 'checkbox_elements_per_page_selector'
-            GM_setValue('checkbox_elements_per_page_selector', false);
+            GM_setValue('checkbox_' + elNameElementsPerPage, false);
 
             //unhideAds();
         }
@@ -330,11 +339,11 @@
 
     /* Append Per Page Select */
 
-    function appendPerPageSelect(position = "left") {
+    function enablePerPageSelect(position = "left") {
         const availablePerPageValues = [20, 30, 60, 100, 200];
 
         // Get previously saved value for elements_per_page
-        const elementsPerPage = GM_getValue('elements_per_page', 20);
+        const elementsPerPage = GM_getValue('elements_per_page', availablePerPageValues[0]);
         // Change value of elements per page to load
         changeElementsPerPage(elementsPerPage);
 
@@ -433,7 +442,7 @@
         });
 
         // Create event onChange
-        const perPageSelectEl = document.getElementById(perPageSelectId);
+        const perPageSelectEl = document.getElementById(select.id);
         perPageSelectEl.addEventListener('change', (event) => {
             const newPerPageValue = parseInt(event.target.value);
             if (availablePerPageValues.includes(newPerPageValue)) {
