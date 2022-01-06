@@ -288,44 +288,6 @@
     }
 
 
-    /* Instant Download */
-
-    function instantDownload() {
-        const thingMatch = window.location.pathname.match(/thing:(\d+)/);
-        const thingId = thingMatch[1];
-
-        const sidebarMenuBtnSelector = 'a[class^="SidebarMenu__download--"]';
-        const thingPageBtnSelector = 'a[class^="ThingFilesListHeader__download--"]';
-
-        // Sidebar menu download button
-        downloadLinkAppend(sidebarMenuBtnSelector, thingId);
-
-        // ThingPage download button
-        const thingPageSelector = 'div[class^="ThingPage__tabContent--"]';
-        waitForKeyElements(thingPageSelector, (thingPageDiv) => {
-            const observer = new MutationObserver(function (mutations) {
-                downloadLinkAppend(thingPageBtnSelector, thingId);
-            });
-
-            const config = {
-                subtree: false,
-                childList: true,
-                attributes: false,
-                characterData: false
-            };
-            observer.observe(thingPageDiv, config);
-        });
-    }
-
-    function downloadLinkAppend(selector, thingId) {
-        waitForKeyElements(selector, (downloadLink) => {
-            const downloadButton = downloadLink.querySelector('div');
-            downloadLink.href = `https://www.thingiverse.com/thing:${thingId}/zip`;
-            downloadButton.parentNode.replaceChild(downloadButton.cloneNode(true), downloadButton);
-        });
-    }
-
-
     /* Change Elements Per Page */
 
     function changeElementsPerPage(elementsPerPage) {
