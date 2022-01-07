@@ -19,6 +19,7 @@
 // ==/UserScript==
 
 //TODO docs for functions
+//TODO check emenets that need to waitForKeyElements before executing action
 (function () {
     'use strict';
 
@@ -666,9 +667,9 @@
         const sidebarMenuBtnSelector = 'a[class^="SidebarMenu__download--"]';
 
         // Sidebar menu download button
-        waitForKeyElements(sidebarMenuBtnSelector, (downloadLink) => {
-            let collectButton = document.querySelector(sidebarMenuBtnSelector);
-            collectButton.onclick = async function(){
+        waitForKeyElements(sidebarMenuBtnSelector, (downloadButton) => {
+            //let downloadButton = document.querySelector(sidebarMenuBtnSelector);
+            downloadButton.onclick = async function(){
                 downloadAllFiles();
             };
         });
@@ -696,13 +697,6 @@
         return response.arrayBuffer();
     }
 
-    function convertToValidFilename(str){
-        return (str + '')
-            .replace(/\n/g,' ')
-            .replace(/[<>:"/\\|?*\x00-\x1F]| +$/g,'')
-            .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/,x=>x+'_');
-    }
-
     function filenameValidator(fname, { replacement = '�' } = {}) {
         // https://stackoverflow.com/a/31976060
         // https://gist.github.com/doctaphred/d01d05291546186941e1b7ddc02034d3
@@ -714,7 +708,7 @@
 
         // forbidden characters
         // (after multi-line, because new-line-chars are themselves forbidden characters)
-        fname = fname.replaceAll(/[<>:"\/\\\|?*\x00-\x1F]/g, replacement);
+        fname = fname.replaceAll(/[<>:"\/\\|?*\x00-\x1F]/g, replacement);
 
         // advanced trim
         fname = fname.replace(/\.$/, '');
