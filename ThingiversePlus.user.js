@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      0.6.0
+// @version      0.6.1
 // @description  Thingiverse with extra features
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -40,22 +40,19 @@
         addPlusSettings();
 
         // Enable Hide Ads
-        checkAndHideAds();
+        let checkboxHideAds = document.getElementById('plus-checkbox-' + elNameHideAds);
+        checkAndHideAds(checkboxHideAds);
 
         // Enable Advanced Collections
-        checkAndEnableAdvancedCollections();
+        let checkboxAdvancedCollections = document.getElementById('plus-checkbox-' + elNameAdvancedCollections);
+        checkAndEnableAdvancedCollections(checkboxAdvancedCollections);
 
-        const pathname = window.location.pathname;
-        if (pathname.startsWith('/thing:')) {
-            // Set 6 elements per page in 'More' section
-            changeElementsPerPage(6);
+        // Enable Elements Per Page
+        let checkboxElementsPerPage = document.getElementById('plus-checkbox-' + elNameElementsPerPage);
+        checkAndEnableElementsPerPage(checkboxElementsPerPage);
 
-            // Enable 'Download All Files' button
-            downloadAllFilesButton();
-        } else if (pathname === '/' || pathname === '/search') {
-            // Enable Elements Per Page Selector
-            checkAndEnableElementsPerPage();
-        }
+        // Enable 'Download All Files' button
+        downloadAllFilesButton();
     }
     /* Settings Button */
 
@@ -180,7 +177,6 @@
         settingsContainer.appendChild(settingsHideAds);
 
         document.body.appendChild(settingsContainer);
-
         addCloseContainerListener();
     }
 
@@ -206,7 +202,7 @@
         checkbox.id = 'plus-checkbox-' + name;
         checkbox.className = 'plus-settings-checkbox';
         checkbox.onchange = function(){
-            onChangeFunction();
+            onChangeFunction(this);
         };
 
         // Get previously saved value
@@ -223,50 +219,59 @@
         return settingsElement;
     }
 
-    function checkAndHideAds() {
-        let checkboxHideAds = document.getElementById('plus-checkbox-' + elNameHideAds);
-        if (checkboxHideAds.checked === true) {
-            GM_setValue('checkbox_' + elNameHideAds, true);
+    function checkAndHideAds(cb) {
+        // update checkbox value
+        GM_setValue('checkbox_' + elNameHideAds, cb.checked);
+
+        if (cb.checked) {
+            const pathname = window.location.pathname;
+            if (pathname.startsWith('/thing:')) {
+                // Set 6 elements per page in 'More' section
+                changeElementsPerPage(6);
+            }
 
             hideAds();
         }
         else {
-            GM_setValue('checkbox_' + elNameHideAds, false);
-
             unhideAds();
         }
     }
 
-    function checkAndEnableAdvancedCollections() {
-        let checkboxAdvancedCollections = document.getElementById('plus-checkbox-' + elNameAdvancedCollections);
-        if (checkboxAdvancedCollections.checked === true) {
-            GM_setValue('checkbox_' + elNameAdvancedCollections, true);
+    function checkAndEnableAdvancedCollections(cb) {
+        // get last checkbox status
+        const cbLastStatus = GM_getValue('checkbox_' + elNameAdvancedCollections, false);
 
+        // update checkbox value
+        GM_setValue('checkbox_' + elNameAdvancedCollections, cb.checked);
+
+        if (cb.checked) {
             enableAdvancedCollections();
         }
         else {
-            const checkboxLastStatus = GM_getValue('checkbox_' + elNameAdvancedCollections, false);
-
-            GM_setValue('checkbox_' + elNameAdvancedCollections, false);
-
             // check last status and reload if changed
-            if (!!checkboxLastStatus) {
+            if (!!cbLastStatus) {
                 window.location.reload(false);
             }
         }
     }
 
-    function checkAndEnableElementsPerPage() {
-        let checkboxElementsPerPageSelector = document.getElementById('plus-checkbox-' + elNameElementsPerPage);
-        if (checkboxElementsPerPageSelector.checked === true) {
-            GM_setValue('checkbox_' + elNameElementsPerPage, true);
+    function checkAndEnableElementsPerPage(cb) {
+        // get last checkbox status
+        const cbLastStatus = GM_getValue('checkbox_' + elNameElementsPerPage, false);
 
-            enablePerPageSelect();
-        }
-        else {
-            GM_setValue('checkbox_' + elNameElementsPerPage, false);
+        // update checkbox value
+        GM_setValue('checkbox_' + elNameElementsPerPage, cb.checked);
 
-            //unhideAds();
+        const pathname = window.location.pathname;
+        if (pathname === '/' || pathname === '/search') {
+            if (cb.checked) {
+                enablePerPageSelect();
+            } else {
+                // check last status and reload if changed
+                if (!!cbLastStatus) {
+                    window.location.reload(false); //TODO find alternative to reload
+                }
+            }
         }
     }
 
@@ -356,12 +361,12 @@
 
 
         // Generate options from given values
-        let availableOptions = new Array();
+        let availableOptions = [];
         availablePerPageValues.forEach(value => {
             let option = document.createElement('option');
-            option.value = value;
+            option.value = value.toString();
             option.selected = elementsPerPage === value;
-            option.innerHTML = value;
+            option.innerHTML = value.toString();
 
             availableOptions.push(option);
         });
@@ -447,10 +452,10 @@
                     }
 
                     // Generate list of option nodes with all Collections
-                    let first = true;
-                    let optionList = new Array();
+                    //let first = true;
+                    let optionList = [];
                     collectionsList.forEach(collection => {
-                        var option = document.createElement('option');
+                        let option = document.createElement('option');
                         option.value = collection.id;
 
                         // if (first){
@@ -463,14 +468,14 @@
 
                     // Generate option to 'Create new Collection'
                     let createNewOption = document.createElement('option');
-                    createNewOption.style = 'display: none;';
+                    createNewOption.style.cssText = 'display: none;';
                     createNewOption.value = '-1';
                     createNewOption.text = 'Create a new Collection';
                     optionList.push(createNewOption);
 
                     // Get all select nodes that contains Collections
                     let selectList = Array.from(document.querySelectorAll('.react-app select>option'))
-                        .filter(option => option.innerHTML == 'Create a new Collection')
+                        .filter(option => option.innerHTML === 'Create a new Collection')
                         .map(option => option.parentNode);
 
 
@@ -479,11 +484,11 @@
                     /* instead use observer.observe to intercept when select changes (visible) and select the correct option  */
                     // Get 'Collect Thing' nodes
                     let collectThingListFirst = Array.from(document.querySelectorAll('a[class^="SideMenuItem__textWrapper--"]'))
-                        .filter(option => option.innerHTML == 'Collect Thing')
+                        .filter(option => option.innerHTML === 'Collect Thing')
                         .map(option => option.parentNode);
 
                     let collectThingListBottom = Array.from(document.querySelectorAll('div[class^="CardActionItem__textWrapper--"]'))
-                        .filter(option => option.innerHTML == 'Collect Thing')
+                        .filter(option => option.innerHTML === 'Collect Thing')
                         .map(option => option.parentNode.parentNode.parentNode);
 
                     let collectThingList = collectThingListFirst.concat(collectThingListBottom);
@@ -506,7 +511,7 @@
                     // Replace existing option nodes with new ones in all select nodes
                     selectList.forEach(selectEl => {
                         // Clone nodes
-                        var newOptionList = optionList.map(option => option.cloneNode(true));
+                        const newOptionList = optionList.map(option => option.cloneNode(true));
 
                         // Replace children
                         selectEl.replaceChildren(...newOptionList);
@@ -516,11 +521,11 @@
                         // Generate button that can be used to 'Create new Collection'
                         //TODO generate one button and function outside foreach. Inside just clone button and associate function with current select
                         let plusButton = document.createElement('button');
-                        plusButton.style = 'width: 16%; height: 30px;';
+                        plusButton.style.cssText = 'width: 16%; height: 30px;';
                         plusButton.textContent = '+';
                         plusButton.onclick = function(){
                             selectEl.value = '-1';
-                            var changeEvent = new Event('change', {
+                            const changeEvent = new Event('change', {
                                 bubbles: true
                             });
                             selectEl.dispatchEvent(changeEvent);
@@ -584,10 +589,10 @@
             return null;
         }
 
-        var mostRecent = new Date(collections[0].modified);
-        var mostRecentIndex = 0;
+        let mostRecent = new Date(collections[0].modified);
+        let mostRecentIndex = 0;
 
-        for (var i = 1; i < collections.length; i++) {
+        for (let i = 1; i < collections.length; i++) {
             if (new Date(collections[i].modified) > mostRecent) {
                 mostRecentIndex = i;
                 mostRecent = new Date(collections[i].modified);
