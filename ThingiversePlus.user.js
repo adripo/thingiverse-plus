@@ -52,7 +52,7 @@
         checkAndEnableElementsPerPage(checkboxElementsPerPage);
 
         // Enable 'Download All Files' button
-        downloadAllFilesButton();
+        downloadAllFilesButton(); //TODO this
     }
     /* Settings Button */
 
