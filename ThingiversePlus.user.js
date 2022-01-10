@@ -279,12 +279,14 @@
     /* Hide Ads */
 
     function hideAds() {
-        const cssHideAds =
-            `div[class^='AdCard__'] {
-                display: none !important;
-            }`;
+        if(!cssHideAdsElement) {
+            const cssHideAds =
+                `div[class^='AdCard__'] {
+                    display: none !important;
+                }`;
 
-        cssHideAdsElement = GM_addStyle(cssHideAds);
+            cssHideAdsElement = GM_addStyle(cssHideAds);
+        }
     }
 
     function unhideAds() {
