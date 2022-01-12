@@ -196,6 +196,43 @@
         });
     }
 
+    function createRadioSubSettingsElement(name, description, onChangeFunction, parentName, ...options) {
+        let settingsElement = document.createElement('div');
+
+        let subSettingsPipe = document.createElement('div');
+        subSettingsPipe.className = 'plus-subsettings-pipe';
+        settingsElement.appendChild(subSettingsPipe);
+
+        let radioContainer = document.createElement('div');
+
+        // Get parent status
+        const parentSavedStatus = GM_getValue('checkbox_' + parentName, false);
+
+        // Get previously saved value
+        const radioSavedStatus = GM_getValue('radio_' + name, null);
+        options.forEach(option => {
+            let radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = name;
+            radio.id = name + '-' + option;
+            radio.value = option;
+            radio.checked = (option === radioSavedStatus);
+            radio.disabled = !parentSavedStatus;
+
+            let label = document.createElement('label');
+            label.className = "radio-inline";
+            label.htmlFor = radio.id;
+            label.innerHTML = option;
+
+            radioContainer.appendChild(radio);
+            radioContainer.appendChild(label);
+        });
+
+        settingsElement.appendChild(radioContainer);
+
+        return settingsElement;
+    }
+
     function createSettingsElement(name, description, onChangeFunction) {
         let settingsElement = document.createElement('div');
         let checkbox = document.createElement('input');
