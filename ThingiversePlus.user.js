@@ -44,16 +44,13 @@
         addPlusSettings();
 
         // Enable Hide Ads
-        let checkboxHideAds = document.getElementById('plus-checkbox-' + elNameHideAds);
-        checkAndHideAds(checkboxHideAds);
+        checkAndHideAds();
 
         // Enable Advanced Collections
-        let checkboxAdvancedCollections = document.getElementById('plus-checkbox-' + elNameAdvancedCollections);
-        checkAndEnableAdvancedCollections(checkboxAdvancedCollections);
+        checkAndEnableAdvancedCollections();
 
         // Enable Elements Per Page
-        let checkboxElementsPerPage = document.getElementById('plus-checkbox-' + elNameElementsPerPage);
-        checkAndEnableElementsPerPage(checkboxElementsPerPage);
+        checkAndEnableElementsPerPage();
 
         // Enable 'Download All Files' button
         downloadAllFilesButton(); //TODO this
@@ -254,7 +251,7 @@
         checkbox.id = 'plus-checkbox-' + name;
         checkbox.className = 'plus-settings-checkbox';
         checkbox.onchange = function(){
-            onChangeFunction(this);
+            onChangeFunction();
         };
 
         // Get previously saved value
@@ -415,7 +412,9 @@
         return settingsElement;
     }
 
-    function checkAndHideAds(cb) {
+    function checkAndHideAds() {
+        let cb = document.getElementById('plus-checkbox-' + elNameHideAds);
+
         // update checkbox value
         GM_setValue('checkbox_' + elNameHideAds, cb.checked);
 
@@ -433,7 +432,9 @@
         }
     }
 
-    function checkAndEnableAdvancedCollections(cb) {
+    function checkAndEnableAdvancedCollections() {
+        let cb = document.getElementById('plus-checkbox-' + elNameAdvancedCollections);
+
         // get last checkbox status
         const cbLastStatus = GM_getValue('checkbox_' + elNameAdvancedCollections, false);
 
