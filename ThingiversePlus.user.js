@@ -28,6 +28,7 @@
     const elNameHideAds = 'hide-ads';
     const elNameAdvancedCollections = 'advanced-collections';
     const elNameElementsPerPage = 'elements-per-page';
+    const elNameElementsPerPagePosition = 'elements-per-page-position';
 
     // Start-up
     setup();
@@ -137,6 +138,22 @@
                 font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
             }
             
+            .plus-settings-subelement {
+                --height: 32px;
+                
+                transition: max-height 0.3s, visibility 0.3s, opacity 0.3s linear;
+                max-height: var(--height);
+                visibility: visible;
+                opacity: 1;
+                overflow: hidden;
+            }
+            
+            .plus-settings-subelement.hidden {
+                max-height: 0;
+                visibility: hidden;
+                opacity: 0;
+            }
+            
             .plus-settings-pipe {
                 --width: 32px;
                 --height: 32px;
@@ -193,7 +210,12 @@
 
         // Elements Per Page
         let settingsElementsPerPage = createSettingsElement(elNameElementsPerPage, 'Elements Per Page Selector', checkAndEnableElementsPerPage);
-        settingsContainer.appendChild(settingsElementsPerPage);
+        settingsElementsPerPageContainer.appendChild(settingsElementsPerPage);
+
+        let settingsElementsPerPagePosition = createToggleSettingsSubElement(elNameElementsPerPagePosition, 'Position', 'left', 'right', checkAndEnableElementsPerPagePosition, elNameElementsPerPage);
+        settingsElementsPerPageContainer.appendChild(settingsElementsPerPagePosition);
+
+        settingsContainer.appendChild(settingsElementsPerPageContainer);
 
         // Advanced Collections
         let settingsAdvancedCollections = createSettingsElement(elNameAdvancedCollections, 'Advanced Collections', checkAndEnableAdvancedCollections);
@@ -337,9 +359,17 @@
         GM_addStyle(cssToggleSwitch);
     }
 
-    function createToggleSubSettingsElement(name, description, option_off, option_on, onChangeFunction, parentName) {
+    function createToggleSettingsSubElement(name, description, option_off, option_on, onChangeFunction, parentName) {
+        // Get parent status
+        const parentSavedStatus = GM_getValue('checkbox_' + parentName, false);
+
         // Settings element
         let settingsElement = document.createElement('div');
+        settingsElement.id = 'plus-settings-' + name;
+        settingsElement.className = 'plus-settings-subelement';
+        if(!parentSavedStatus) {
+            settingsElement.classList.add('hidden');
+        }
 
         // Pipe element
         let pipeElement = document.createElement('div');
@@ -351,11 +381,8 @@
         descriptionElement.innerHTML = description + ':';
         settingsElement.appendChild(descriptionElement);
 
-        // Get parent status
-        const parentSavedStatus = GM_getValue('checkbox_' + parentName, false);
-
         // Get previously saved value
-        const toggleSavedStatus = GM_getValue('toggle_' + name, null);
+        const toggleSavedStatus = GM_getValue('toggle_' + name, false);
 
         // Toggle switch element
         let toggleElement = document.createElement('label');
@@ -363,8 +390,12 @@
 
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
+        checkbox.id = 'plus-toggle-' + name;
         checkbox.checked = !!toggleSavedStatus;
         checkbox.disabled = !parentSavedStatus;
+        checkbox.onchange = function(){
+            onChangeFunction();
+        };
         toggleElement.appendChild(checkbox);
 
         let slider = document.createElement('span');
@@ -418,12 +449,65 @@
         }
     }
 
-    function checkAndEnableElementsPerPage(cb) {
+    function checkAndEnableElementsPerPage() {
+        let cb = document.getElementById('plus-checkbox-' + elNameElementsPerPage);
+
         // get last checkbox status
         const cbLastStatus = GM_getValue('checkbox_' + elNameElementsPerPage, false);
 
         // update checkbox value
         GM_setValue('checkbox_' + elNameElementsPerPage, cb.checked);
+
+        // If checkbox is clicked
+        if (cb.checked !== cbLastStatus) {
+            // Toggle subSettings elements
+            toggleChildSettings(elNameElementsPerPagePosition);
+        }
+
+        if (cb.checked) {
+            // If was disabled
+
+
+            enableElementsPerPage();
+        }
+        else{
+            if (!!cbLastStatus) {
+                disableElementsPerPage();
+            }
+        }
+
+
+    }
+
+    function checkAndEnableElementsPerPagePosition() {
+        let cb = document.getElementById('plus-toggle-' + elNameElementsPerPagePosition);
+
+        // update checkbox value
+        GM_setValue('toggle_' + elNameElementsPerPagePosition, cb.checked);
+
+        // Remove old selector and CSS
+        disableElementsPerPage();
+
+        // Recall creation function
+        checkAndEnableElementsPerPage();
+    }
+
+    function disableElementsPerPage() {
+        let select = document.querySelector('.plus-elements-per-page');
+        if (select) {
+            select.remove();
+        }
+        if (cssElementsPerPageElement){
+            cssElementsPerPageElement.remove();
+            cssElementsPerPageElement = undefined;
+        }
+        if (cssElementsPerPageExtraElement){
+            cssElementsPerPageExtraElement.remove();
+            cssElementsPerPageExtraElement = undefined;
+        }
+    }
+
+    function enableElementsPerPage() {
 
         const pathname = window.location.pathname;
         if (pathname === '/' || pathname === '/search') {
