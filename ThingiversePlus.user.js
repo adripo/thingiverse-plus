@@ -58,12 +58,12 @@
     /* Settings Button */
 
     function addPlusSettings() {
-        createSettingsCSS();
+        createPlusSettingsCSS();
         createSettingsButton();
         createSettingsContainer();
     }
 
-    function createSettingsCSS() {
+    function createPlusSettingsCSS() {
         const cssPlusSettings =
             `.plus-settings-button {
                 position: fixed;
@@ -93,6 +93,8 @@
                 right: 10px;
                 max-height: 100%;
                 max-width: 100%;
+                visibility: visible;
+                opacity: 1;
                 background-color: #248bfb;
                 overflow: hidden;
                 padding: 5px;
@@ -100,9 +102,9 @@
                 box-sizing: content-box;
             }
             
-            .plus-settings-hidden {
-                max-height: 0;
+            .plus-settings-container.hidden {
                 max-width: 0;
+                max-height: 0;
                 visibility: hidden;
                 opacity: 0;
             }
@@ -155,7 +157,6 @@
             
             .plus-settings-pipe {
                 --width: 32px;
-                --height: 32px;
                 --top-gap: 2px;
                 
                 display: inline-block;
@@ -194,7 +195,7 @@
 
         img.onclick = function(){
             let settingsContainer = document.querySelector('.plus-settings-container');
-            settingsContainer.classList.toggle('plus-settings-hidden');
+            settingsContainer.classList.toggle('hidden');
         };
 
         settingsButton.appendChild(img);
@@ -205,7 +206,7 @@
     function createSettingsContainer() {
         let settingsContainer = document.createElement('div');
         settingsContainer.classList.add('plus-settings-container')
-        settingsContainer.classList.add('plus-settings-hidden');
+        settingsContainer.classList.add('hidden');
 
         // Elements Per Page
         let settingsElementsPerPage = createSettingsElement(elNameElementsPerPage, 'Elements Per Page Selector', checkAndEnableElementsPerPage);
@@ -234,11 +235,11 @@
             const settingsButton = document.querySelector('.plus-settings-button');
 
             // if Settings Container is visible and click outside of Settings Button and outside the Settings Container
-            if (!settingsContainer.classList.contains('plus-settings-hidden') &&
+            if (!settingsContainer.classList.contains('hidden') &&
                 !settingsButton.contains(e.target) &&
                 !settingsContainer.contains(e.target)
             ){
-                settingsContainer.classList.add('plus-settings-hidden');
+                settingsContainer.classList.add('hidden');
             }
         });
     }
