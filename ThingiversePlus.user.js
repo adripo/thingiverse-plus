@@ -135,9 +135,35 @@
                 line-height: 32px;
                 cursor: pointer;
                 font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
+            }
+            
+            .plus-settings-pipe {
+                --width: 32px;
+                --height: 32px;
+                --top-gap: 2px;
+                
+                display: inline-block;
+                vertical-align: middle;
+                width: calc(var(--width) / 2);
+                height: calc(var(--height) / 2 - var(--top-gap));
+                margin: var(--top-gap) 0 calc(var(--height) / 2 - var(--top-gap)) calc(var(--width) / 2);
+                color: #555;
+                opacity: .8;
+                border-left: 1px dashed;
+                border-bottom: 1px dashed;
+            }
+            
+            .plus-settings-pipe+span {
+                color: #555;
+                opacity: 1;
+                font-size: 16px;
+                margin: 0 10px 0 10px;
+                font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
             }`;
 
         GM_addStyle(cssPlusSettings);
+
+        createToggleSwitchCSS();
     }
 
     function createSettingsButton() {
@@ -217,6 +243,141 @@
 
         settingsElement.appendChild(checkbox);
         settingsElement.appendChild(label);
+
+        return settingsElement;
+    }
+
+
+
+    function createToggleSwitchCSS(){
+        const cssToggleSwitch =
+            `.plus-toggle {
+                --width: 60px;
+                --height: calc(var(--width) / 3);
+                
+                position: relative;
+                display: inline-block;
+                opacity: 1;
+                width: var(--width);
+                height: var(--height);
+                border-radius: var(--height);
+                cursor: pointer;
+            }
+        
+            .plus-toggle input {
+                display: none;
+            }
+        
+            .plus-toggle .slider {
+                position: absolute;
+                opacity: 1;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border-radius: var(--height);
+                border: 2px solid #aaa;
+                transition: all 0.4s ease-in-out;
+            }
+        
+            .plus-toggle .slider::before {
+                content: '';
+                position: absolute;
+                top: calc((var(--height) * 0.1) / 2);
+                left: calc((var(--height) * 0.1) / 2);
+                width: calc(var(--height)*0.9);
+                height: calc(var(--height)*0.9);
+                border-radius: calc(var(--height) / 2);
+                background-color: #fff;
+                transition: all 0.4s ease-in-out;
+            }
+        
+            .plus-toggle input:checked+.slider {
+                border: 2px solid #248bfb;
+            }
+        
+            .plus-toggle input:checked+.slider::before {
+                background-color: #2475ff;
+            }
+        
+            .plus-toggle .labels {
+                position: absolute;
+                opacity: 1;
+                font-size: 0.75rem;
+                top: calc(var(--height) * 0.5 - (16px / 2)); /*16px = height of 0.75rem font*/
+                left: calc(var(--height) + 2px);
+                /*width: 100%;*/
+                /*height: 100%;*/
+                color: #555;
+                transition: all 0.4s ease-in-out;
+            }
+        
+            .plus-toggle .labels::after {
+                content: attr(data-off);
+                position: absolute;
+                opacity: 1;
+                transition: all 0.4s ease-in-out;
+            }
+        
+            .plus-toggle .labels::before {
+                content: attr(data-on);
+                position: absolute;
+                opacity: 0;
+                transition: all 0.4s ease-in-out;
+            }
+        
+            .plus-toggle input:checked~.labels::after {
+                opacity: 0;
+            }
+        
+            .plus-toggle input:checked~.labels::before {
+                opacity: 1;
+            }`;
+
+        GM_addStyle(cssToggleSwitch);
+    }
+
+    function createToggleSubSettingsElement(name, description, option_off, option_on, onChangeFunction, parentName) {
+        // Settings element
+        let settingsElement = document.createElement('div');
+
+        // Pipe element
+        let pipeElement = document.createElement('div');
+        pipeElement.className = 'plus-settings-pipe';
+        settingsElement.appendChild(pipeElement);
+
+        // Description div
+        let descriptionElement = document.createElement('span');
+        descriptionElement.innerHTML = description + ':';
+        settingsElement.appendChild(descriptionElement);
+
+        // Get parent status
+        const parentSavedStatus = GM_getValue('checkbox_' + parentName, false);
+
+        // Get previously saved value
+        const toggleSavedStatus = GM_getValue('toggle_' + name, null);
+
+        // Toggle switch element
+        let toggleElement = document.createElement('label');
+        toggleElement.className = 'plus-toggle';
+
+        let checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = !!toggleSavedStatus;
+        checkbox.disabled = !parentSavedStatus;
+        toggleElement.appendChild(checkbox);
+
+        let slider = document.createElement('span');
+        slider.className = 'slider';
+        toggleElement.appendChild(slider);
+
+        let labels = document.createElement('span');
+        labels.className = 'labels';
+        labels.setAttribute('data-off', option_off.toUpperCase());
+        labels.setAttribute('data-on', option_on.toUpperCase());
+        toggleElement.appendChild(labels);
+
+        settingsElement.appendChild(toggleElement);
 
         return settingsElement;
     }
