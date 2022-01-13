@@ -648,6 +648,13 @@
         availableOptions.forEach(option => {
             select.add(option);
         });
+        select.onchange = function(){
+            const newPerPageValue = parseInt(this.value);
+            if (availablePerPageValues.includes(newPerPageValue)) {
+                GM_setValue('elements_per_page', newPerPageValue);
+            }
+            window.location.reload(false);
+        };
 
         let label = document.createElement('label');
         label.htmlFor = select.id;
