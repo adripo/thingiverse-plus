@@ -25,6 +25,8 @@
 
     // Global variables
     let cssHideAdsElement;
+    let cssElementsPerPageElement;
+    let cssElementsPerPageExtraElement;
     const elNameHideAds = 'hide-ads';
     const elNameAdvancedCollections = 'advanced-collections';
     const elNameElementsPerPage = 'elements-per-page';
@@ -511,16 +513,32 @@
 
         const pathname = window.location.pathname;
         if (pathname === '/' || pathname === '/search') {
-            if (cb.checked) {
-                enablePerPageSelect();
-            } else {
-                // check last status and reload if changed
-                if (!!cbLastStatus) {
-                    window.location.reload(false); //TODO find alternative to reload
-                }
-            }
+            const positionRightStatus = GM_getValue('toggle_' + elNameElementsPerPagePosition, false);
+
+            enablePerPageSelect(positionRightStatus);
         }
     }
+
+    function toggleChildSettings(elementName){
+        let el = document.getElementById('plus-settings-' + elementName);
+        el.classList.toggle('hidden');
+
+        // Enable checkboxes
+        let checkboxes = Array.from(el.querySelectorAll('input[type=checkbox]'));
+        checkboxes.forEach(checkbox => {
+            checkbox.disabled = !checkbox.disabled;
+        });
+    }
+
+    /*function enableChildCheckboxes(currentCb){
+        let sibling = currentCb.parentNode.nextSibling;
+        do {
+            let checkboxes = Array.from(sibling.querySelectorAll('input[type=checkbox]'));
+            checkboxes.forEach(checkbox => {
+                checkbox.disabled = false;
+            });
+        } while (sibling = sibling.nextSibling);
+    }*/
 
     /* Hide Ads */
 
@@ -555,7 +573,7 @@
 
     /* Append Per Page Select */
 
-    function enablePerPageSelect(position = "left") {
+    function enablePerPageSelect(positionRight = false) {
         const availablePerPageValues = [20, 30, 60, 100, 200];
 
         // Get previously saved value for elements_per_page
@@ -638,34 +656,22 @@
         htmlElementsPerPage.appendChild(select);
 
         // Add CSS
-        GM_addStyle(cssElementsPerPage);
+        cssElementsPerPageElement = GM_addStyle(cssElementsPerPage);
 
         // Add html
-        const filterBySortSelector = 'div[class^="FilterBySort__dropdown--"]';
-        waitForKeyElements(filterBySortSelector, (filterBySortDiv) => {
-            if (position === "left") {
-                // Add Extra CSS
-                GM_addStyle(cssElementsPerPageExtraLeft);
-                // Adde html
-                filterBySortDiv.parentNode.prepend(htmlElementsPerPage);
-            }
-            else if (position === "right") {
-                // Add Extra CSS
-                GM_addStyle(cssElementsPerPageExtraRight);
-                // Adde html
-                filterBySortDiv.parentNode.append(htmlElementsPerPage);
-            }
-        });
-
-        // Create event onChange
-        const perPageSelectEl = document.getElementById(select.id);
-        perPageSelectEl.addEventListener('change', (event) => {
-            const newPerPageValue = parseInt(event.target.value);
-            if (availablePerPageValues.includes(newPerPageValue)) {
-                GM_setValue('elements_per_page', newPerPageValue);
-            }
-            window.location.reload(false);
-        });
+        const filterBySortDiv = document.querySelector('div[class^="FilterBySort__dropdown--"]');
+        if (!positionRight) {
+            // Add Extra CSS
+            cssElementsPerPageExtraElement = GM_addStyle(cssElementsPerPageExtraLeft);
+            // Add html
+            filterBySortDiv.parentNode.prepend(htmlElementsPerPage);
+        }
+        else {
+            // Add Extra CSS
+            cssElementsPerPageExtraElement = GM_addStyle(cssElementsPerPageExtraRight);
+            // Add html
+            filterBySortDiv.parentNode.append(htmlElementsPerPage);
+        }
     }
 
 
