@@ -209,6 +209,8 @@
         settingsContainer.classList.add('hidden');
 
         // Elements Per Page
+        let settingsElementsPerPageContainer = document.createElement('div');
+
         let settingsElementsPerPage = createSettingsElement(elNameElementsPerPage, 'Elements Per Page Selector', checkAndEnableElementsPerPage);
         settingsElementsPerPageContainer.appendChild(settingsElementsPerPage);
 
@@ -558,6 +560,7 @@
     function unhideAds() {
         if (cssHideAdsElement) {
             cssHideAdsElement.remove();
+            cssHideAdsElement = undefined;
         }
     }
 
@@ -929,6 +932,7 @@
 
         const sidebarMenuBtnSelector = 'a[class^="SidebarMenu__download--"]';
 
+        //TODO remove waitforkeyelement (maybe mutation observer)
         // Sidebar menu download button
         waitForKeyElements(sidebarMenuBtnSelector, (downloadButton) => {
             //let downloadButton = document.querySelector(sidebarMenuBtnSelector);
