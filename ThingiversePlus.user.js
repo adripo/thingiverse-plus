@@ -460,7 +460,7 @@
         else {
             // check last status and reload if changed
             if (!!cbLastStatus) {
-                window.location.reload(false);
+                window.location.reload();
             }
         }
     }
