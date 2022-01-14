@@ -31,11 +31,14 @@
     const elNameAdvancedCollections = 'advanced-collections';
     const elNameElementsPerPage = 'elements-per-page';
     const elNameElementsPerPagePosition = 'elements-per-page-position';
+    const elNameDownloadAllFiles = 'download-all-files';
 
     // Start-up
     setup();
 
+
     /*** FUNCTIONS ***/
+
 
     /* Setup */
 
@@ -53,8 +56,10 @@
         checkAndEnableElementsPerPage();
 
         // Enable 'Download All Files' button
-        downloadAllFilesButton(); //TODO this
+        checkAndEnableDownloadAllFilesButton();
     }
+
+
     /* Settings Button */
 
     function addPlusSettings() {
@@ -208,13 +213,17 @@
         settingsContainer.classList.add('plus-settings-container')
         settingsContainer.classList.add('hidden');
 
+        // Download All Files Button
+        let settingsDownloadAllFiles = createSettingsElement(elNameDownloadAllFiles, 'Download All Files As Zip', checkAndEnableDownloadAllFilesButton);
+        settingsContainer.appendChild(settingsDownloadAllFiles);
+
         // Elements Per Page
         let settingsElementsPerPageContainer = document.createElement('div');
 
         let settingsElementsPerPage = createSettingsElement(elNameElementsPerPage, 'Elements Per Page Selector', checkAndEnableElementsPerPage);
         settingsElementsPerPageContainer.appendChild(settingsElementsPerPage);
 
-        let settingsElementsPerPagePosition = createToggleSettingsSubElement(elNameElementsPerPagePosition, 'Position', 'left', 'right', checkAndEnableElementsPerPagePosition, elNameElementsPerPage);
+        let settingsElementsPerPagePosition = createToggleSettingsSubElement(elNameElementsPerPagePosition, 'Position', 'left', 'right', elementsPerPagePositionOnClick, elNameElementsPerPage);
         settingsElementsPerPageContainer.appendChild(settingsElementsPerPagePosition);
 
         settingsContainer.appendChild(settingsElementsPerPageContainer);
@@ -246,7 +255,6 @@
         });
     }
 
-
     function createSettingsElement(name, description, onChangeFunction) {
         let settingsElement = document.createElement('div');
         let checkbox = document.createElement('input');
@@ -271,11 +279,13 @@
         return settingsElement;
     }
 
-
-
     function createToggleSwitchCSS(){
         const cssToggleSwitch =
-            `.plus-toggle {
+            `.wait {
+                cursor: wait;
+            }
+            
+            .plus-toggle {
                 --width: 60px;
                 --height: calc(var(--width) / 3);
                 
@@ -485,7 +495,24 @@
 
     }
 
-    function checkAndEnableElementsPerPagePosition() {
+    function checkAndEnableDownloadAllFilesButton() {
+        let cb = document.getElementById('plus-checkbox-' + elNameDownloadAllFiles);
+
+        // get last checkbox status
+        const cbLastStatus = GM_getValue('checkbox_' + elNameDownloadAllFiles, false);
+
+        // update checkbox value
+        GM_setValue('checkbox_' + elNameDownloadAllFiles, cb.checked);
+
+        if (cb.checked) {
+            enableDownloadAllFilesBindButton();
+        }
+        else{
+            disableDownloadAllFilesBindButton();
+        }
+    }
+
+    function elementsPerPagePositionOnClick() {
         let cb = document.getElementById('plus-toggle-' + elNameElementsPerPagePosition);
 
         // update checkbox value
@@ -514,7 +541,6 @@
     }
 
     function enableElementsPerPage() {
-
         const pathname = window.location.pathname;
         if (pathname === '/' || pathname === '/search') {
             const positionRightStatus = GM_getValue('toggle_' + elNameElementsPerPagePosition, false);
@@ -534,15 +560,6 @@
         });
     }
 
-    /*function enableChildCheckboxes(currentCb){
-        let sibling = currentCb.parentNode.nextSibling;
-        do {
-            let checkboxes = Array.from(sibling.querySelectorAll('input[type=checkbox]'));
-            checkboxes.forEach(checkbox => {
-                checkbox.disabled = false;
-            });
-        } while (sibling = sibling.nextSibling);
-    }*/
 
     /* Hide Ads */
 
@@ -657,7 +674,7 @@
             if (availablePerPageValues.includes(newPerPageValue)) {
                 GM_setValue('elements_per_page', newPerPageValue);
             }
-            window.location.reload(false);
+            window.location.reload();
         };
 
         let label = document.createElement('label');
@@ -920,26 +937,42 @@
             });
     }
 
-    function downloadAllFilesButton() {
-
-        const cssDownloadAllFiles =
-            `.wait {
-                cursor: wait;
-            }`;
-        GM_addStyle(cssDownloadAllFiles);
-
-
-
+    function enableDownloadAllFilesBindButton() {
         const sidebarMenuBtnSelector = 'a[class^="SidebarMenu__download--"]';
 
-        //TODO remove waitforkeyelement (maybe mutation observer)
         // Sidebar menu download button
-        waitForKeyElements(sidebarMenuBtnSelector, (downloadButton) => {
-            //let downloadButton = document.querySelector(sidebarMenuBtnSelector);
-            downloadButton.onclick = async function(){
-                downloadAllFiles();
-            };
-        });
+        let downloadButton = document.querySelector(sidebarMenuBtnSelector);
+        if (downloadButton) {
+            downloadAllFilesAttach(downloadButton);
+        } else {
+            waitForKeyElements(sidebarMenuBtnSelector, (loadedDownloadButton) => {
+                downloadAllFilesAttach(loadedDownloadButton);
+            });
+        }
+    }
+
+    function downloadAllFilesAttach(button) {
+        button.onclick = async function(){
+            downloadAllFiles();
+        };
+    }
+
+    function disableDownloadAllFilesBindButton() {
+        const sidebarMenuBtnSelector = 'a[class^="SidebarMenu__download--"]';
+
+        // Sidebar menu download button
+        let downloadButton = document.querySelector(sidebarMenuBtnSelector);
+        if (downloadButton) {
+            downloadAllFilesDetach(downloadButton);
+        } else {
+            waitForKeyElements(sidebarMenuBtnSelector, (loadedDownloadButton) => {
+                downloadAllFilesDetach(loadedDownloadButton);
+            });
+        }
+    }
+
+    function downloadAllFilesDetach(button) {
+        button.onclick = null;
     }
 
     function extractCurrentThing() {
