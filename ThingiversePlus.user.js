@@ -908,7 +908,7 @@
         let files = thing.files;
 
         files.forEach(file => {
-            let filePromise = downloadFile(file.direct_url);
+            let filePromise = downloadFile(file.public_url);
             zip.file(file.name, filePromise);
         });
 
