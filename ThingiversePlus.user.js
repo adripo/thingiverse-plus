@@ -70,7 +70,11 @@
 
     function createPlusSettingsCSS() {
         const cssPlusSettings =
-            `.plus-settings-button {
+            `.wait {
+                cursor: wait;
+            }
+            
+            .plus-settings-button {
                 position: fixed;
                 z-index: 101;
                 bottom: 10px;
