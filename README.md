@@ -1,2 +1,2 @@
 # thingiverse-plus
-Thingiverse Plus Userscipt
+Thingiverse Plus Userscript
