@@ -32,6 +32,7 @@
     const elNameElementsPerPage = 'elements-per-page';
     const elNameElementsPerPagePosition = 'elements-per-page-position';
     const elNameDownloadAllFiles = 'download-all-files';
+    const elNameDownloadAllFilesImages = 'download-all-files-images';
 
     // Start-up
     setup();
@@ -148,7 +149,16 @@
                 font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
             }
             
-            .plus-settings-subelement {
+            .plus-subsettings-element>.plus-settings-checkbox {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .plus-subsettings-element>.plus-settings-checkbox+label {
+                font-size: 14px;
+            }
+            
+            .plus-subsettings-element {
                 --height: 32px;
                 
                 transition: max-height 0.3s, visibility 0.3s, opacity 0.3s linear;
@@ -158,7 +168,7 @@
                 overflow: hidden;
             }
             
-            .plus-settings-subelement.hidden {
+            .plus-subsettings-element.hidden {
                 max-height: 0;
                 visibility: hidden;
                 opacity: 0;
@@ -218,8 +228,15 @@
         settingsContainer.classList.add('hidden');
 
         // Download All Files Button
+        let settingsDownloadAllFilesContainer = document.createElement('div');
+
         let settingsDownloadAllFiles = createSettingsElement(elNameDownloadAllFiles, 'Download All Files As Zip', checkAndEnableDownloadAllFilesButton);
-        settingsContainer.appendChild(settingsDownloadAllFiles);
+        settingsDownloadAllFilesContainer.appendChild(settingsDownloadAllFiles);
+
+        let settingsDownloadAllFilesImages = createSubsettingsCheckboxElement(elNameDownloadAllFilesImages, 'include images', downloadAllFilesImagesOnClick, elNameDownloadAllFiles);
+        settingsDownloadAllFilesContainer.appendChild(settingsDownloadAllFilesImages);
+
+        settingsContainer.appendChild(settingsDownloadAllFilesContainer);
 
         // Elements Per Page
         let settingsElementsPerPageContainer = document.createElement('div');
@@ -227,7 +244,7 @@
         let settingsElementsPerPage = createSettingsElement(elNameElementsPerPage, 'Elements Per Page Selector', checkAndEnableElementsPerPage);
         settingsElementsPerPageContainer.appendChild(settingsElementsPerPage);
 
-        let settingsElementsPerPagePosition = createToggleSettingsSubElement(elNameElementsPerPagePosition, 'Position', 'left', 'right', elementsPerPagePositionOnClick, elNameElementsPerPage);
+        let settingsElementsPerPagePosition = createSubsettingsToggleElement(elNameElementsPerPagePosition, 'Position', 'left', 'right', elementsPerPagePositionOnClick, elNameElementsPerPage);
         settingsElementsPerPageContainer.appendChild(settingsElementsPerPagePosition);
 
         settingsContainer.appendChild(settingsElementsPerPageContainer);
@@ -283,13 +300,49 @@
         return settingsElement;
     }
 
+    function createSubsettingsCheckboxElement(name, description, onChangeFunction, parentName){
+        // Get parent status
+        const parentSavedStatus = GM_getValue('settings_' + parentName, false);
+
+        // Settings element
+        let settingsElement = document.createElement('div');
+        settingsElement.id = 'plus-settings-' + name;
+        settingsElement.className = 'plus-subsettings-element';
+        if(!parentSavedStatus) {
+            settingsElement.classList.add('hidden');
+        }
+
+        // Pipe element
+        let pipeElement = document.createElement('div');
+        pipeElement.className = 'plus-settings-pipe';
+        settingsElement.appendChild(pipeElement);
+
+        // Get previously saved value
+        const checkboxSavedStatus = GM_getValue('subsettings_' + name, false);
+
+        // Checkbox
+        let checkboxElement = document.createElement('input');
+        checkboxElement.type = 'checkbox';
+        checkboxElement.id = 'plus-checkbox-' + name;
+        checkboxElement.className = 'plus-settings-checkbox';
+        checkboxElement.checked = !!checkboxSavedStatus;
+        checkboxElement.disabled = !parentSavedStatus;
+        checkboxElement.onchange = function(){
+            onChangeFunction();
+        };
+        settingsElement.appendChild(checkboxElement);
+
+        let labelElement = document.createElement('label');
+        labelElement.htmlFor = checkboxElement.id;
+        labelElement.innerHTML = description;
+        settingsElement.appendChild(labelElement);
+
+        return settingsElement;
+    }
+
     function createToggleSwitchCSS(){
         const cssToggleSwitch =
-            `.wait {
-                cursor: wait;
-            }
-            
-            .plus-toggle {
+            `.plus-toggle {
                 --width: 60px;
                 --height: calc(var(--width) / 3);
                 
@@ -375,14 +428,14 @@
         GM_addStyle(cssToggleSwitch);
     }
 
-    function createToggleSettingsSubElement(name, description, option_off, option_on, onChangeFunction, parentName) {
+    function createSubsettingsToggleElement(name, description, option_off, option_on, onChangeFunction, parentName) {
         // Get parent status
         const parentSavedStatus = GM_getValue('checkbox_' + parentName, false);
 
         // Settings element
         let settingsElement = document.createElement('div');
         settingsElement.id = 'plus-settings-' + name;
-        settingsElement.className = 'plus-settings-subelement';
+        settingsElement.className = 'plus-subsettings-element';
         if(!parentSavedStatus) {
             settingsElement.classList.add('hidden');
         }
@@ -392,13 +445,13 @@
         pipeElement.className = 'plus-settings-pipe';
         settingsElement.appendChild(pipeElement);
 
-        // Description div
+        // Description span
         let descriptionElement = document.createElement('span');
         descriptionElement.innerHTML = description + ':';
         settingsElement.appendChild(descriptionElement);
 
         // Get previously saved value
-        const toggleSavedStatus = GM_getValue('toggle_' + name, false);
+        const toggleSavedStatus = GM_getValue('subsettings_' + name, false);
 
         // Toggle switch element
         let toggleElement = document.createElement('label');
@@ -506,7 +559,13 @@
         const cbLastStatus = GM_getValue('checkbox_' + elNameDownloadAllFiles, false);
 
         // update checkbox value
-        GM_setValue('checkbox_' + elNameDownloadAllFiles, cb.checked);
+        GM_setValue('settings_' + elNameDownloadAllFiles, cb.checked);
+
+        // If checkbox is clicked
+        if (cb.checked !== cbLastStatus) {
+            // Toggle subSettings elements
+            toggleChildSettings(elNameDownloadAllFilesImages);
+        }
 
         if (cb.checked) {
             enableDownloadAllFilesBindButton();
@@ -520,13 +579,20 @@
         let cb = document.getElementById('plus-toggle-' + elNameElementsPerPagePosition);
 
         // update checkbox value
-        GM_setValue('toggle_' + elNameElementsPerPagePosition, cb.checked);
+        GM_setValue('subsettings_' + elNameElementsPerPagePosition, cb.checked);
 
         // Remove old selector and CSS
         disableElementsPerPage();
 
         // Recall creation function
         checkAndEnableElementsPerPage();
+    }
+
+    function downloadAllFilesImagesOnClick() {
+        let cb = document.getElementById('plus-checkbox-' + elNameDownloadAllFilesImages);
+
+        // update checkbox value
+        GM_setValue('subsettings_' + elNameDownloadAllFilesImages, cb.checked);
     }
 
     function disableElementsPerPage() {
@@ -906,9 +972,10 @@
         document.body.classList.add('wait');
 
         let zip = new JSZip();
-        let imgFolder = zip.folder('images');
 
         let thing = JSON.parse(stripBackslashes(extractCurrentThing())).thing;
+
+        // Zip thing files
         let files = thing.files;
 
         files.forEach(file => {
@@ -916,18 +983,25 @@
             zip.file(file.name, filePromise);
         });
 
-        let images = thing.images;
+        // Include images
+        const includeImages = GM_getValue('subsettings_' + elNameDownloadAllFilesImages, false);
 
-        images.forEach(image => {
-            let largeImages = image.sizes.filter( el => {
-                return el.type==='display' &&
-                    el.size==='large';
+        if (includeImages) {
+            let imgFolder = zip.folder('images');
+
+            let images = thing.images;
+
+            images.forEach(image => {
+                let largeImages = image.sizes.filter( el => {
+                    return el.type==='display' &&
+                        el.size==='large';
+                });
+                let imageUrl = largeImages[0].url;
+
+                let filePromise = downloadFile(imageUrl);
+                imgFolder.file(image.name, filePromise);
             });
-            let imageUrl = largeImages[0].url;
-
-            let filePromise = downloadFile(imageUrl);
-            imgFolder.file(image.name, filePromise);
-        });
+        }
 
         let zipName = thing.id + ' - ' + thing.name;
         zipName = filenameValidator(zipName).fname;
