@@ -760,14 +760,6 @@
 
     function enableAdvancedCollections() {
 
-        let collections = extractCollections();
-        console.log(collections);
-
-        collections.forEach(collection => {
-            console.log(collection);
-        });
-
-
         const bearer = extractBearer();
 
         if (bearer) {
@@ -881,15 +873,6 @@
                 .catch((error) => {
                     console.error('Error:', error);
                 });
-        }
-    }
-
-    function extractCollections() {
-        try {
-            return JSON.parse(
-                stripBackslashes(JSON.parse(window.localStorage['persist:root']).collections)).userData;
-        } catch (e) {
-            return null;
         }
     }
 
