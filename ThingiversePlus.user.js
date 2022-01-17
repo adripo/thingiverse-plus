@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      1.1.0
+// @version      1.1.1
 // @description  Thingiverse with extra features
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -119,13 +119,13 @@
                 opacity: 0;
             }
             
-            .plus-settings-container>div {
+            .plus-settings-container > div {
                 background-color: #f5f5f5;
                 padding: 10px;
                 border-radius: 3px;
             }
             
-            .plus-settings-container>div:not(:last-child) {
+            .plus-settings-container > div:not(:last-child) {
                 margin-bottom: 5px;
             }
             
@@ -137,7 +137,7 @@
                 cursor: pointer;
             }
             
-            .plus-settings-checkbox+label {
+            .plus-settings-checkbox + label {
                 display: inline-block;
                 vertical-align: middle;
                 color: #555;
@@ -147,15 +147,6 @@
                 line-height: 32px;
                 cursor: pointer;
                 font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
-            }
-            
-            .plus-subsettings-element>.plus-settings-checkbox {
-                width: 24px;
-                height: 24px;
-            }
-            
-            .plus-subsettings-element>.plus-settings-checkbox+label {
-                font-size: 14px;
             }
             
             .plus-subsettings-element {
@@ -174,6 +165,14 @@
                 opacity: 0;
             }
             
+            .plus-subsettings-element label,
+            .plus-subsettings-element span {
+                color: #555;
+                opacity: 1;
+                font-size: 14px;
+                margin: auto;
+            }
+            
             .plus-settings-pipe {
                 --width: 32px;
                 --top-gap: 2px;
@@ -189,12 +188,14 @@
                 border-bottom: 1px dashed;
             }
             
-            .plus-settings-pipe+span {
-                color: #555;
-                opacity: 1;
-                font-size: 16px;
+            .plus-settings-pipe + span,
+            .plus-settings-pipe + input {
                 margin: 0 10px 0 10px;
-                font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
+            }
+            
+            .plus-subsettings-element > .plus-settings-checkbox {
+                width: 24px;
+                height: 24px;
             }`;
 
         GM_addStyle(cssPlusSettings);
