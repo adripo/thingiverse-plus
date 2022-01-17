@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      1.0.0
+// @version      1.1.0
 // @description  Thingiverse with extra features
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -342,87 +342,63 @@
 
     function createToggleSwitchCSS(){
         const cssToggleSwitch =
-            `.plus-toggle {
-                --width: 60px;
-                --height: calc(var(--width) / 3);
+            `/* Toggle Style */
+            .plus-toggle {
+                --width: 120px;
+                --height: calc(var(--width) / 6);
                 
                 position: relative;
                 display: inline-block;
                 opacity: 1;
                 width: var(--width);
                 height: var(--height);
-                border-radius: var(--height);
+                vertical-align: middle;
+                margin: auto;
+                background-color: rgba(0,0,0,.1);
                 cursor: pointer;
             }
-        
-            .plus-toggle input {
-                display: none;
+            
+            .plus-toggle, .plus-toggle .slider {
+                height: var(--height);
+                border-radius: calc( var(--height) / 2);
             }
-        
+            
             .plus-toggle .slider {
                 position: absolute;
-                opacity: 1;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                border-radius: var(--height);
-                border: 2px solid #aaa;
-                transition: all 0.4s ease-in-out;
+                width: 50%;
+                background-color: #248bfb;
+                box-shadow: 0 2px 15px rgba(0,0,0,.15);
+                transition: transform .2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             }
-        
-            .plus-toggle .slider::before {
-                content: '';
-                position: absolute;
-                top: calc((var(--height) * 0.1) / 2);
-                left: calc((var(--height) * 0.1) / 2);
-                width: calc(var(--height)*0.9);
-                height: calc(var(--height)*0.9);
-                border-radius: calc(var(--height) / 2);
-                background-color: #fff;
-                transition: all 0.4s ease-in-out;
-            }
-        
-            .plus-toggle input:checked+.slider {
-                border: 2px solid #248bfb;
-            }
-        
-            .plus-toggle input:checked+.slider::before {
-                background-color: #2475ff;
-            }
-        
             .plus-toggle .labels {
+                width: 50%;
+                height: 100%;
                 position: absolute;
+                display: flex;
                 opacity: 1;
+                justify-content: center;
+                align-items: center;
                 font-size: 0.75rem;
-                top: calc(var(--height) * 0.5 - (16px / 2)); /*16px = height of 0.75rem font*/
-                left: calc(var(--height) + 2px);
-                /*width: 100%;*/
-                /*height: 100%;*/
                 color: #555;
-                transition: all 0.4s ease-in-out;
+                transition: color .2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             }
-        
-            .plus-toggle .labels::after {
-                content: attr(data-off);
-                position: absolute;
-                opacity: 1;
-                transition: all 0.4s ease-in-out;
+            
+            .plus-toggle .labels.right {
+                right: 0;
             }
-        
-            .plus-toggle .labels::before {
-                content: attr(data-on);
-                position: absolute;
-                opacity: 0;
-                transition: all 0.4s ease-in-out;
+            
+            /* Toggle */
+            .plus-toggle input[type="checkbox"] {
+                display: none;
             }
-        
-            .plus-toggle input:checked~.labels::after {
-                opacity: 0;
+            
+            .plus-toggle input[type="checkbox"]:checked + .slider {
+                transform: translateX(100%);
             }
-        
-            .plus-toggle input:checked~.labels::before {
-                opacity: 1;
+            
+            .plus-toggle input[type="checkbox"]:checked ~ .labels.right,
+            .plus-toggle input[type="checkbox"]:not(:checked) ~ .labels:not(.right) {
+                color: white;
             }`;
 
         GM_addStyle(cssToggleSwitch);
@@ -467,15 +443,19 @@
         };
         toggleElement.appendChild(checkbox);
 
-        let slider = document.createElement('span');
+        let slider = document.createElement('div');
         slider.className = 'slider';
         toggleElement.appendChild(slider);
 
-        let labels = document.createElement('span');
-        labels.className = 'labels';
-        labels.setAttribute('data-off', option_off.toUpperCase());
-        labels.setAttribute('data-on', option_on.toUpperCase());
-        toggleElement.appendChild(labels);
+        let labelLeft = document.createElement('span');
+        labelLeft.className = 'labels';
+        labelLeft.innerHTML = option_off.toUpperCase();
+        toggleElement.appendChild(labelLeft);
+
+        let labelRight = document.createElement('span');
+        labelRight.className = 'labels right';
+        labelRight.innerHTML = option_on.toUpperCase();
+        toggleElement.appendChild(labelRight);
 
         settingsElement.appendChild(toggleElement);
 
