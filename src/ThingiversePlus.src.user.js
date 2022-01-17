@@ -938,7 +938,8 @@
 
         let zip = new JSZip();
 
-        let thing = JSON.parse(stripBackslashes(extractCurrentThing())).thing;
+        console.log(stripslashes(extractCurrentThing()));
+        let thing = JSON.parse(stripslashes(extractCurrentThing())).thing;
 
         // Zip thing files
         let files = thing.files;
@@ -1026,8 +1027,8 @@
         }
     }
 
-    function stripBackslashes(str) {
-        return (str + '').replace('\\', '');
+    function stripslashes(str) {
+        return (str + '').replace(/\\'/g,'\'').replace(/\"/g,'"').replace(/\\\\/g,'\\').replace(/\\0/g,'\0');
     }
 
     async function downloadFile(url) {
