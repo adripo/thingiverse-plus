@@ -34,17 +34,19 @@ jobs:
         run: npm install terser -g
 
       - name: "[minify] Minify script"
-        run: terser src/${{ env.script_name }}.src.user.js \
-          --parse bare_returns \
-          --compress \
-          --mangle \
-          --comments "/@.*|==\/?UserScript==/" \
-          --output ${{ env.script_name }}.user.js
+        run: |
+          terser src/${{ env.script_name }}.src.user.js \
+            --parse bare_returns \
+            --compress \
+            --mangle \
+            --comments "/@.*|==\/?UserScript==/" \
+            --output ${{ env.script_name }}.user.js
 
       - name: "[script] Update meta.js"
-        run: awk '/\/\/ ==UserScript==/,/\/\/ ==\/UserScript==/' \
-          src/${{ env.script_name }}.src.user.js \
-          > ${{ env.script_name }}.meta.js
+        run: |
+          awk '/\/\/ ==UserScript==/,/\/\/ ==\/UserScript==/' \
+            src/${{ env.script_name }}.src.user.js \
+            > ${{ env.script_name }}.meta.js
 
       - name: "[git] Git add"
         run: git add .
