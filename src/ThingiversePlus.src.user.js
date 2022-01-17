@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      1.1.1
+// @version      1.1.2
 // @description  Thingiverse with extra features
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -18,7 +18,6 @@
 // @grant        GM_setValue
 // ==/UserScript==
 
-// test
 //TODO docs for functions
 //TODO check emenets that need to waitForKeyElements before executing action
 (function () {
@@ -769,7 +768,7 @@
 
             getCollections(username, bearer)
                 .then(collectionsList => {
-                    console.log('Successfully retrieved Collections.');
+                    //console.log('Successfully retrieved Collections.');
 
                     // Put most recent Collection in the first place
                     let indexMR = indexOfMostRecentCollection(collectionsList);
