@@ -18,6 +18,7 @@
 // @grant        GM_setValue
 // ==/UserScript==
 
+// test
 //TODO docs for functions
 //TODO check emenets that need to waitForKeyElements before executing action
 (function () {
