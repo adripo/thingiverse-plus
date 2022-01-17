@@ -287,7 +287,7 @@
         };
 
         // Get previously saved value
-        const checkboxSavedStatus = GM_getValue('checkbox_' + name, false);
+        const checkboxSavedStatus = GM_getValue('settings_' + name, false);
         checkbox.checked = !!checkboxSavedStatus;
 
         let label = document.createElement('label');
@@ -430,7 +430,7 @@
 
     function createSubsettingsToggleElement(name, description, option_off, option_on, onChangeFunction, parentName) {
         // Get parent status
-        const parentSavedStatus = GM_getValue('checkbox_' + parentName, false);
+        const parentSavedStatus = GM_getValue('settings_' + parentName, false);
 
         // Settings element
         let settingsElement = document.createElement('div');
@@ -486,7 +486,7 @@
         let cb = document.getElementById('plus-checkbox-' + elNameHideAds);
 
         // update checkbox value
-        GM_setValue('checkbox_' + elNameHideAds, cb.checked);
+        GM_setValue('settings_' + elNameHideAds, cb.checked);
 
         if (cb.checked) {
             const pathname = window.location.pathname;
@@ -506,10 +506,10 @@
         let cb = document.getElementById('plus-checkbox-' + elNameAdvancedCollections);
 
         // get last checkbox status
-        const cbLastStatus = GM_getValue('checkbox_' + elNameAdvancedCollections, false);
+        const cbLastStatus = GM_getValue('settings_' + elNameAdvancedCollections, false);
 
         // update checkbox value
-        GM_setValue('checkbox_' + elNameAdvancedCollections, cb.checked);
+        GM_setValue('settings_' + elNameAdvancedCollections, cb.checked);
 
         if (cb.checked) {
             enableAdvancedCollections();
@@ -526,10 +526,10 @@
         let cb = document.getElementById('plus-checkbox-' + elNameElementsPerPage);
 
         // get last checkbox status
-        const cbLastStatus = GM_getValue('checkbox_' + elNameElementsPerPage, false);
+        const cbLastStatus = GM_getValue('settings_' + elNameElementsPerPage, false);
 
         // update checkbox value
-        GM_setValue('checkbox_' + elNameElementsPerPage, cb.checked);
+        GM_setValue('settings_' + elNameElementsPerPage, cb.checked);
 
         // If checkbox is clicked
         if (cb.checked !== cbLastStatus) {
@@ -556,7 +556,7 @@
         let cb = document.getElementById('plus-checkbox-' + elNameDownloadAllFiles);
 
         // get last checkbox status
-        const cbLastStatus = GM_getValue('checkbox_' + elNameDownloadAllFiles, false);
+        const cbLastStatus = GM_getValue('settings_' + elNameDownloadAllFiles, false);
 
         // update checkbox value
         GM_setValue('settings_' + elNameDownloadAllFiles, cb.checked);
@@ -613,7 +613,7 @@
     function enableElementsPerPage() {
         const pathname = window.location.pathname;
         if (pathname === '/' || pathname === '/search') {
-            const positionRightStatus = GM_getValue('toggle_' + elNameElementsPerPagePosition, false);
+            const positionRightStatus = GM_getValue('subsettings_' + elNameElementsPerPagePosition, false);
 
             enablePerPageSelect(positionRightStatus);
         }
