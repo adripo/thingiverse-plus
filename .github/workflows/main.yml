@@ -1,0 +1,79 @@
+# This action will create minified script and update meta
+
+name: Minify UserScript and Update Meta
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      script_name: "ThingiversePlus"
+
+    steps:
+      - name: "[git] Checkout"
+        uses: actions/checkout@v2
+
+      - name: "[git] Git config"
+        run: |
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ github.actor }}@users.noreply.github.com
+
+      - name: "[node] Use Node.js 14"
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: "[node] Install terser"
+        run: npm install terser -g
+
+      - name: "[minify] Minify script"
+        run: terser src/${{ env.script_name }}.src.user.js \
+          --parse bare_returns \
+          --compress \
+          --mangle \
+          --comments "/@.*|==\/?UserScript==/" \
+          --output ${{ env.script_name }}.user.js
+
+      - name: "[script] Update meta.js"
+        run: awk '/\/\/ ==UserScript==/,/\/\/ ==\/UserScript==/' \
+          src/${{ env.script_name }}.src.user.js \
+          > ${{ env.script_name }}.meta.js
+
+      - name: "[git] Git add"
+        run: git add .
+
+      - name: "[git] Check if there are changes to commit"
+        run: |
+          lines=$( git diff --cached | wc -l )
+          if [ $lines -gt 0 ]; then
+            haschanges=1
+          else
+            haschanges=0
+          fi
+          echo "::set-env name=HAS_CHANGES::$haschanges"
+
+      # Was used a workaround to preserve multiple lines when setting env
+      # https://github.community/t5/GitHub-Actions/set-output-Truncates-Multiline-Strings/m-p/38372/highlight/true#M3322
+      - name: "[git] Get last commit message"
+        run: |
+          message=$(git log --format=%B --no-merges -1)
+          message="${message//'%'/'%25'}"
+          message="${message//$'\n'/'%0A'}"
+          message="${message//$'\r'/'%0D'}"
+          echo "::set-env name=COMMIT_MSG::$message"
+        if: env.HAS_CHANGES == 1
+
+      - name: "[git] Git commit"
+        run: git commit -m "$COMMIT_MSG"
+        if: env.HAS_CHANGES == 1
+
+      - name: "[git] Git push"
+        run: git push
+        if: env.HAS_CHANGES == 1
