@@ -6,7 +6,7 @@ Main features:
 - Download All Files as ZIP
 - Select number of elements to show in homepage and search results
 - (beta) Advanced Collections: show all user collections with relative number of saved items
-  > by default thingiverse shows only a limited numbers of collections
+  > by default thingiverse shows only a limited number of collections
 - Ads hiding
 
 
