@@ -939,7 +939,10 @@
 
         console.log(stripslashes(extractCurrentThing()));
         let thing = JSON.parse(stripslashes(extractCurrentThing())).thing;
+        let thingDescription = thing.description;
 
+        zip.file("summary.txt", thingDescription);
+        
         // Zip thing files
         let files = thing.files;
 
