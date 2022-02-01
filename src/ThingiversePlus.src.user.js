@@ -940,6 +940,10 @@
         console.log(stripslashes(extractCurrentThing()));
         let thing = JSON.parse(stripslashes(extractCurrentThing())).thing;
 
+        // Adds summary description in a txt file to the zip download archive 
+        let thingDescription = thing.description;
+        zip.file("summary.txt", thingDescription);
+        
         // Zip thing files
         let files = thing.files;
 
