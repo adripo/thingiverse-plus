@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      1.2.0
+// @version      1.1.2
 // @description  Thingiverse with extra features
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -27,7 +27,6 @@
     let cssHideBannersElement;
     let cssHideAdsElement;
     let cssElementsPerPageElement;
-    let cssElementsPerPageExtraElement;
     const elNameHideBanners = 'hide-banners';
     const elNameHideAds = 'hide-ads';
     const elNameAdvancedCollections = 'advanced-collections';
@@ -600,17 +599,15 @@
     }
 
     function disableElementsPerPage() {
-        let select = document.querySelector('.plus-elements-per-page');
-        if (select) {
-            select.remove();
-        }
+        const select = document.querySelectorAll('.plus-elements-per-page');
+
+        select.forEach((selectItem) => {
+            selectItem.remove();
+        });
+
         if (cssElementsPerPageElement){
             cssElementsPerPageElement.remove();
             cssElementsPerPageElement = undefined;
-        }
-        if (cssElementsPerPageExtraElement){
-            cssElementsPerPageExtraElement.remove();
-            cssElementsPerPageExtraElement = undefined;
         }
     }
 
@@ -704,48 +701,42 @@
         // Generate CSS
         const cssElementsPerPage =
             `.plus-elements-per-page {
-                display: inline-block;
-                position: relative;
                 background-color: #fff;
                 width: 300px;
-                margin-bottom: 10px;
-                margin-right: 20px;
-                vertical-align: top;
             }
 
             .plus-elements-per-page > label {
-                display: inline-block;
-                width: 210px;
-                margin-left: 10px;
-                font-size: 12px;
-                color: #555;
-                text-align: left;
+                display: flex;
+                height: 30px;
+                opacity: 1;
             }
 
-            .plus-elements-per-page > select {
+            .plus-elements-per-page > label > span {
+                flex-grow: 1;
+                padding: 10px 0 10px 10px;
+                font-size: 12px;
+                line-height: 11px;
+                color: #555;
+            }
+
+            .plus-elements-per-page > label > select {
                 width: 80px;
                 height: 30px;
                 cursor: pointer;
                 border: 0;
                 border-left: 1px solid rgba(85, 85, 85, .8);
                 color: #555;
-                opacity: 0.8;
-            }`;
-
-        const cssElementsPerPageExtraLeft =
-            `div[class^='Sort__dropdown--'] {
-                margin-left: 0px;
-            }`;
-
-        const cssElementsPerPageExtraRight =
-            `div[class^='FilterBySort__dropdown--'] {
-                margin-right: 20px;
             }
 
-            .plus-elements-per-page {
-                margin-right: 0;
-            }`;
+            .plus-hidden {
+                visibility: hidden;
+            }
 
+            @media (max-width: 1639px) {
+            .plus-hidden {
+                display: none;
+                }
+            }`;
 
         // Generate options from given values
         let availableOptions = [];
@@ -758,12 +749,19 @@
             availableOptions.push(option);
         });
 
+        // Generate empty filter
+        let emptyFilter = document.createElement('div');
+        emptyFilter.classList.add('plus-elements-per-page', 'plus-hidden');
+
         // Generate html
         let htmlElementsPerPage = document.createElement('div');
         htmlElementsPerPage.className = 'plus-elements-per-page';
 
+        let span = document.createElement('span');
+        span.innerHTML = "Elements per page";
+
         let select = document.createElement('select');
-        select.id = 'plus-elements-per-page';
+        select.id = 'plus-elements-per-page-select';
         availableOptions.forEach(option => {
             select.add(option);
         });
@@ -777,10 +775,11 @@
 
         let label = document.createElement('label');
         label.htmlFor = select.id;
-        label.innerHTML = "Elements per page:";
+
+        label.appendChild(span);
+        label.appendChild(select);
 
         htmlElementsPerPage.appendChild(label);
-        htmlElementsPerPage.appendChild(select);
 
         // Add CSS
         cssElementsPerPageElement = GM_addStyle(cssElementsPerPage);
@@ -788,15 +787,13 @@
         // Add html
         const filterBySortDiv = document.querySelector('div[class^="FilterBySort__dropdown--"]');
         if (!positionRight) {
-            // Add Extra CSS
-            cssElementsPerPageExtraElement = GM_addStyle(cssElementsPerPageExtraLeft);
             // Add html
             filterBySortDiv.parentNode.prepend(htmlElementsPerPage);
+            filterBySortDiv.parentNode.append(emptyFilter);
         }
         else {
-            // Add Extra CSS
-            cssElementsPerPageExtraElement = GM_addStyle(cssElementsPerPageExtraRight);
             // Add html
+            filterBySortDiv.parentNode.prepend(emptyFilter);
             filterBySortDiv.parentNode.append(htmlElementsPerPage);
         }
     }
