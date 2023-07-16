@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      1.1.2
+// @version      1.2.0
 // @description  Thingiverse with extra features
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -24,9 +24,11 @@
     'use strict';
 
     // Global variables
+    let cssHideBannersElement;
     let cssHideAdsElement;
     let cssElementsPerPageElement;
     let cssElementsPerPageExtraElement;
+    const elNameHideBanners = 'hide-banners';
     const elNameHideAds = 'hide-ads';
     const elNameAdvancedCollections = 'advanced-collections';
     const elNameElementsPerPage = 'elements-per-page';
@@ -46,6 +48,9 @@
     function setup() {
         // Add ThingiversePlus Settings Button
         addPlusSettings();
+
+        // Enable Hide Banners
+        checkAndHideBanners();
 
         // Enable Hide Ads
         checkAndHideAds();
@@ -74,7 +79,7 @@
             `.wait {
                 cursor: wait;
             }
-            
+
             .plus-settings-button {
                 position: fixed;
                 z-index: 101;
@@ -84,7 +89,7 @@
                 padding: 5px;
                 background-color: #fff;
             }
-            
+
             .plus-settings-button img {
                 box-sizing: content-box;
                 max-width: 20px;
@@ -94,7 +99,7 @@
                 background-color: #248bfb;
                 cursor: pointer;
             }
-            
+
             .plus-settings-container {
                 position: fixed;
                 transition: max-height 0.3s, max-width 0.3s, visibility 0.3s, opacity 0.3s linear;
@@ -111,24 +116,24 @@
                 border-radius: 3px;
                 box-sizing: content-box;
             }
-            
+
             .plus-settings-container.hidden {
                 max-width: 0;
                 max-height: 0;
                 visibility: hidden;
                 opacity: 0;
             }
-            
+
             .plus-settings-container > div {
                 background-color: #f5f5f5;
                 padding: 10px;
                 border-radius: 3px;
             }
-            
+
             .plus-settings-container > div:not(:last-child) {
                 margin-bottom: 5px;
             }
-            
+
             .plus-settings-checkbox {
                 vertical-align: middle;
                 width: 32px;
@@ -136,7 +141,7 @@
                 margin: 0;
                 cursor: pointer;
             }
-            
+
             .plus-settings-checkbox + label {
                 display: inline-block;
                 vertical-align: middle;
@@ -148,23 +153,23 @@
                 cursor: pointer;
                 font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
             }
-            
+
             .plus-subsettings-element {
                 --height: 32px;
-                
+
                 transition: max-height 0.3s, visibility 0.3s, opacity 0.3s linear;
                 max-height: var(--height);
                 visibility: visible;
                 opacity: 1;
                 overflow: hidden;
             }
-            
+
             .plus-subsettings-element.hidden {
                 max-height: 0;
                 visibility: hidden;
                 opacity: 0;
             }
-            
+
             .plus-subsettings-element label,
             .plus-subsettings-element span {
                 color: #555;
@@ -172,11 +177,11 @@
                 font-size: 14px;
                 margin: auto;
             }
-            
+
             .plus-settings-pipe {
                 --width: 32px;
                 --top-gap: 2px;
-                
+
                 display: inline-block;
                 vertical-align: middle;
                 width: calc(var(--width) / 2);
@@ -187,12 +192,12 @@
                 border-left: 1px dashed;
                 border-bottom: 1px dashed;
             }
-            
+
             .plus-settings-pipe + span,
             .plus-settings-pipe + input {
                 margin: 0 10px 0 10px;
             }
-            
+
             .plus-subsettings-element > .plus-settings-checkbox {
                 width: 24px;
                 height: 24px;
@@ -253,6 +258,10 @@
         // Advanced Collections
         let settingsAdvancedCollections = createSettingsElement(elNameAdvancedCollections, 'Advanced Collections', checkAndEnableAdvancedCollections);
         settingsContainer.appendChild(settingsAdvancedCollections);
+
+        // Hide Banners
+        let settingsHideBanners = createSettingsElement(elNameHideBanners, 'Hide Banners', checkAndHideBanners);
+        settingsContainer.appendChild(settingsHideBanners);
 
         // Hide Ads
         let settingsHideAds = createSettingsElement(elNameHideAds, 'Hide Ads', checkAndHideAds);
@@ -347,7 +356,7 @@
             .plus-toggle {
                 --width: 120px;
                 --height: calc(var(--width) / 6);
-                
+
                 position: relative;
                 display: inline-block;
                 opacity: 1;
@@ -358,12 +367,12 @@
                 background-color: rgba(0,0,0,.1);
                 cursor: pointer;
             }
-            
+
             .plus-toggle, .plus-toggle .slider {
                 height: var(--height);
                 border-radius: calc( var(--height) / 2);
             }
-            
+
             .plus-toggle .slider {
                 position: absolute;
                 width: 50%;
@@ -383,20 +392,20 @@
                 color: #555;
                 transition: color .2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             }
-            
+
             .plus-toggle .labels.right {
                 right: 0;
             }
-            
+
             /* Toggle */
             .plus-toggle input[type="checkbox"] {
                 display: none;
             }
-            
+
             .plus-toggle input[type="checkbox"]:checked + .slider {
                 transform: translateX(100%);
             }
-            
+
             .plus-toggle input[type="checkbox"]:checked ~ .labels.right,
             .plus-toggle input[type="checkbox"]:not(:checked) ~ .labels:not(.right) {
                 color: white;
@@ -461,6 +470,20 @@
         settingsElement.appendChild(toggleElement);
 
         return settingsElement;
+    }
+
+    function checkAndHideBanners() {
+        let cb = document.getElementById('plus-checkbox-' + elNameHideBanners);
+
+        // update checkbox value
+        GM_setValue('settings_' + elNameHideBanners, cb.checked);
+
+        if (cb.checked) {
+            hideBanners();
+        }
+        else {
+            unhideBanners();
+        }
     }
 
     function checkAndHideAds() {
@@ -612,6 +635,30 @@
     }
 
 
+    /* Hide Banners */
+
+    function hideBanners() {
+        if(!cssHideBannersElement) {
+            const cssHideBanners =
+                `div[class^='HomePageBanner__'] {
+                    display: none !important;
+                }
+
+                div[class^='SiteWideNotification__'] {
+                    display: none !important;
+                }`;
+
+            cssHideBannersElement = GM_addStyle(cssHideBanners);
+        }
+    }
+
+    function unhideBanners() {
+        if (cssHideBannersElement) {
+            cssHideBannersElement.remove();
+            cssHideBannersElement = undefined;
+        }
+    }
+
     /* Hide Ads */
 
     function hideAds() {
@@ -694,7 +741,7 @@
             `div[class^='FilterBySort__dropdown--'] {
                 margin-right: 20px;
             }
-            
+
             .plus-elements-per-page {
                 margin-right: 0;
             }`;
