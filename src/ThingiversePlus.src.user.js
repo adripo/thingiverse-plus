@@ -983,6 +983,9 @@
                 })
                 .catch((error) => {
                     console.error('Error:', error);
+                })
+                .finally(() => {
+                    disableSpinnerLoading (target);
                 });
         }
     }
