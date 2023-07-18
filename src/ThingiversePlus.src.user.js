@@ -912,17 +912,10 @@
                     createNewOption.text = 'Create a new Collection';
                     optionList.push(createNewOption);
 
-                    // Get all select nodes that contains Collections
-                    let selectList = Array.from(document.querySelectorAll('.react-app select>option'))
-                        .filter(option => option.innerHTML === 'Create a new Collection')
-                        .map(option => option.parentNode);
-
-
-
                     /** just a Workaround to select first option of connections. it automatically selects the last created.*/
                     /* instead use observer.observe to intercept when select changes (visible) and select the correct option  */
                     // Get 'Collect Thing' nodes
-                    let collectThingListFirst = Array.from(document.querySelectorAll('a[class^="SideMenuItem__textWrapper--"]'))
+                    let collectThingListFirst = Array.from(document.querySelectorAll('a[class^="SideMenuItem__textWrapper"]'))
                         .filter(option => option.innerHTML === 'Collect Thing')
                         .map(option => option.parentNode);
 
@@ -935,9 +928,7 @@
                     collectThingList.forEach(collectButton => {
                         collectButton.onclick = async function(){
                             await sleep(0);
-                            selectList.forEach(selectEl => {
-                                selectEl.selectedIndex = 0;
-                            });
+                            selectWrapper.selectedIndex = 0;
                         };
                     });
 
@@ -948,13 +939,13 @@
                     /*** end workaround */
 
                     // Replace existing option nodes with new ones in all select nodes
-                    selectList.forEach(selectEl => {
+                    //selectList.forEach(selectEl => {
                         // Clone nodes
                         const newOptionList = optionList.map(option => option.cloneNode(true));
 
                         // Replace children
-                        selectEl.replaceChildren(...newOptionList);
-                        selectEl.selectedIndex = 0;
+                        selectWrapper.replaceChildren(...newOptionList);
+                        selectWrapper.selectedIndex = 0;
                         //TODO if account has no collections select 'create new collection' and trigger selectEl.dispatchEvent(changeEvent);
 
                         // Generate button that can be used to 'Create new Collection'
@@ -963,11 +954,11 @@
                         plusButton.style.cssText = 'width: 16%; height: 30px;';
                         plusButton.textContent = '+';
                         plusButton.onclick = function(){
-                            selectEl.value = '-1';
+                            selectWrapper.value = '-1';
                             const changeEvent = new Event('change', {
                                 bubbles: true
                             });
-                            selectEl.dispatchEvent(changeEvent);
+                            selectWrapper.dispatchEvent(changeEvent);
                         };
 
                         // Generate span with button
@@ -977,8 +968,7 @@
                         selectEl.style = 'width: 84%;';
 
                         // Append created span with button after current select
-                        selectEl.after(plusButtonSpan);
-                    });
+                        selectWrapper.after(plusButtonSpan);
                     //TODO wait end
                 })
                 .catch((error) => {
