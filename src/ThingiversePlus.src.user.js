@@ -951,7 +951,7 @@
                         // Generate button that can be used to 'Create new Collection'
                         //TODO generate one button and function outside foreach. Inside just clone button and associate function with current select
                         let plusButton = document.createElement('button');
-                        plusButton.style.cssText = 'width: 16%; height: 30px;';
+                        plusButton.style.cssText = 'width: ' + plusButtonSize + '; height: ' + plusButtonSize + ';';
                         plusButton.textContent = '+';
                         plusButton.onclick = function(){
                             selectWrapper.value = '-1';
@@ -963,9 +963,6 @@
 
                         // Generate span with button
                         let plusButtonSpan = generateSpan(plusButton);
-
-                        // Change current select style
-                        selectEl.style = 'width: 84%;';
 
                         // Append created span with button after current select
                         selectWrapper.after(plusButtonSpan);
