@@ -1021,7 +1021,7 @@
     function addCollectionWindowListener() {
         const config = {attributes: false, childList: true, subtree: true};
 
-        const callback = (mutationList, observer) => {
+        const callback = (mutationList) => {
             for (const mutation of mutationList) {
                 if (mutation.type === "childList") {
                     mutation.addedNodes.forEach(node => {
