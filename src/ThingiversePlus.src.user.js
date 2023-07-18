@@ -27,6 +27,8 @@
     let cssHideBannersElement;
     let cssHideAdsElement;
     let cssElementsPerPageElement;
+    let advancedCollectionObserver;
+
     const elNameHideBanners = 'hide-banners';
     const elNameHideAds = 'hide-ads';
     const elNameAdvancedCollections = 'advanced-collections';
@@ -971,6 +973,34 @@
             spanEl.appendChild(childNode);
         }
         return spanEl;
+    }
+
+    function addCollectionWindowListener() {
+        const config = { attributes: false, childList: true, subtree: true };
+
+        const callback = (mutationList, observer) => {
+            for (const mutation of mutationList) {
+                if (mutation.type === "childList") {
+                    mutation.addedNodes.forEach(node => {
+                        node.classList.forEach(cls => {
+                            if (cls.startsWith("CollectThingWindow__collectWindowContainer--")) {
+                                loadAdvancedCollections(node);
+                            }
+                        });
+                    });
+                }
+            }
+        };
+
+        advancedCollectionObserver = new MutationObserver(callback);
+        advancedCollectionObserver.observe(document.body, config);
+    }
+
+    function removeCollectionWindowListener() {
+        if (typeof advancedCollectionObserver !== 'undefined') {
+            advancedCollectionObserver.disconnect();
+            advancedCollectionObserver = undefined;
+        }
     }
 
 
