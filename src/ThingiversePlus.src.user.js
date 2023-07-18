@@ -634,7 +634,7 @@
 
     /* Hide Banners */
 
-    function hideBanners() {
+    function enableHideBanners() {
         if(!cssHideBannersElement) {
             const cssHideBanners =
                 `div[class^='HomePageBanner__'] {
@@ -649,7 +649,7 @@
         }
     }
 
-    function unhideBanners() {
+    function disableHideBanners() {
         if (cssHideBannersElement) {
             cssHideBannersElement.remove();
             cssHideBannersElement = undefined;
@@ -658,7 +658,7 @@
 
     /* Hide Ads */
 
-    function hideAds() {
+    function enableHideAds() {
         if(!cssHideAdsElement) {
             const cssHideAds =
                 `div[class^='CardGrid__']:has(> div[class^='AdCard__']),
@@ -670,7 +670,7 @@
         }
     }
 
-    function unhideAds() {
+    function disableHideAds() {
         if (cssHideAdsElement) {
             cssHideAdsElement.remove();
             cssHideAdsElement = undefined;
