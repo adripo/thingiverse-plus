@@ -805,6 +805,71 @@
     /* Advanced Collections */
 
     function enableAdvancedCollections() {
+        document.querySelectorAll('div[class^="CollectThingWindow__closeImageWrapper--"]').forEach(button => button.click());
+        addCollectionWindowListener();
+    }
+
+    function disableAdvancedCollections() {
+        document.querySelectorAll('div[class^="CollectThingWindow__closeImageWrapper--"]').forEach(button => button.click());
+        removeCollectionWindowListener();
+    }
+
+    function createSpinnerLoadingCSS(){
+        const cssToggleSwitch =
+            `/* Spinner Loading */
+            
+            .plus-spinner-wrapper {
+                display: flex;
+                position: absolute;                
+                background: rgba(0,0,0,0.6);
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: 100%;
+                align-items: center;
+                justify-content: center;
+                z-index: 1;                
+            }
+    
+            .plus-spinner-loading {
+                background-image: url(https://cdn.thingiverse.com/site/assets/inline-icons/19420d877d0e95abb31b.svg);
+                background-repeat: no-repeat;
+                background-position: 50%;
+                height: 117px;
+                width: 117px;
+                animation: plus-spin 7s linear infinite;
+            }
+            @keyframes plus-spin { 
+                100% { 
+                    transform:rotate(360deg); 
+                } 
+            }`;
+
+        GM_addStyle(cssToggleSwitch);
+    }
+
+    function enableSpinnerLoading (target) {
+        let spinnerWrapper = document.createElement('div');
+        spinnerWrapper.className = 'plus-spinner-wrapper';
+
+        let spinnerLoading = document.createElement('i');
+        spinnerLoading.className = 'plus-spinner-loading';
+
+        spinnerWrapper.appendChild(spinnerLoading);
+
+        target.prepend(spinnerWrapper);
+    }
+
+    function disableSpinnerLoading (target) {
+        let spinnerWrapper = target.querySelector('div.plus-spinner-wrapper');
+        spinnerWrapper.remove();
+    }
+
+    function loadAdvancedCollections(target) {
+        const plusButtonSize = '30px';
+
+        enableSpinnerLoading(target);
+
 
         const bearer = extractBearer();
 
