@@ -537,6 +537,7 @@
         updateSiblingsVisibility(targetCheckbox, targetCheckbox.checked);
     }
 
+    //TODO convert to toggle and use el.classList.toggle('hidden');
     function updateSiblingsVisibility (targetCheckbox, visible) {
         for (let sibling of targetCheckbox.parentNode.parentNode.children) {
             if (sibling !== targetCheckbox.parentNode) {
