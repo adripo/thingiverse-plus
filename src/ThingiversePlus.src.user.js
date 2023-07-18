@@ -1055,8 +1055,8 @@
 
         let zip = new JSZip();
 
-        console.log(stripslashes(extractCurrentThing()));
-        let thing = JSON.parse(stripslashes(extractCurrentThing())).thing;
+        console.log(extractCurrentThing().stripSlashes());
+        let thing = JSON.parse(extractCurrentThing().stripSlashes()).thing;
 
         // Zip thing files
         let files = thing.files;
@@ -1144,8 +1144,8 @@
         }
     }
 
-    function stripslashes(str) {
-        return (str + '').replace(/\\'/g, '\'').replace(/\"/g, '"').replace(/\\\\/g, '\\').replace(/\\0/g, '\0');
+    String.prototype.stripSlashes = function(){
+        return this.replace(/\\(.)/mg, "$1");
     }
 
     async function downloadFile(url) {
