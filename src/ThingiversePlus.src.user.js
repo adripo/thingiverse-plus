@@ -110,8 +110,7 @@
 
         if (featureStatus) {
             feature.enableFunction();
-        }
-        else {
+        } else {
             feature.disableFunction();
         }
     }
@@ -270,7 +269,7 @@
         img.src = buttonImage;
         img.alt = 'ThingiversePlus-logo';
 
-        img.onclick = function(){
+        img.onclick = function () {
             let settingsContainer = document.querySelector('.plus-settings-container');
             settingsContainer.classList.toggle('hidden');
         };
@@ -295,7 +294,7 @@
     }
 
     function addCloseContainerListener() {
-        window.addEventListener('click', function(e){
+        window.addEventListener('click', function (e) {
             let settingsContainer = document.querySelector('.plus-settings-container');
             const settingsButton = document.querySelector('.plus-settings-button');
 
@@ -303,7 +302,7 @@
             if (!settingsContainer.classList.contains('hidden') &&
                 !settingsButton.contains(e.target) &&
                 !settingsContainer.contains(e.target)
-            ){
+            ) {
                 settingsContainer.classList.add('hidden');
             }
         });
@@ -320,7 +319,7 @@
         checkbox.type = 'checkbox';
         checkbox.id = 'plus-checkbox-' + feature.name;
         checkbox.className = 'plus-settings-checkbox';
-        checkbox.onchange = function(){
+        checkbox.onchange = function () {
             updateConfigStatus(this, feature);
         };
 
@@ -337,7 +336,7 @@
 
         featureContainer.appendChild(featureConfig);
 
-        if (feature.options !== undefined){
+        if (feature.options !== undefined) {
             feature.options.forEach(option => {
                 let featureSubconfig = createFeatureSubconfig(option, checkbox.checked)
                 featureContainer.appendChild(featureSubconfig);
@@ -347,7 +346,7 @@
         return featureContainer;
     }
 
-    function createFeatureSubconfig(option, visible){
+    function createFeatureSubconfig(option, visible) {
         let featureSubconfig;
 
         switch (option.type) {
@@ -362,12 +361,12 @@
         return featureSubconfig;
     }
 
-    function createSubconfigCheckbox(option, visible){
+    function createSubconfigCheckbox(option, visible) {
         // Settings element
         let subconfig = document.createElement('div');
         subconfig.id = 'plus-settings-' + option.name;
         subconfig.className = 'plus-subsettings-element';
-        if(!visible) {
+        if (!visible) {
             subconfig.classList.add('hidden');
         }
 
@@ -386,7 +385,7 @@
         checkboxElement.className = 'plus-settings-checkbox';
         checkboxElement.checked = !!checkboxSavedStatus;
         checkboxElement.disabled = !visible;
-        checkboxElement.onchange = function(){
+        checkboxElement.onchange = function () {
             updateSubconfigStatus(this, option);
         };
         subconfig.appendChild(checkboxElement);
@@ -399,12 +398,12 @@
         return subconfig;
     }
 
-    function createSubconfigToggle(option, visible){
+    function createSubconfigToggle(option, visible) {
         // Settings element
         let subconfig = document.createElement('div');
         subconfig.id = 'plus-settings-' + option.name;
         subconfig.className = 'plus-subsettings-element';
-        if(!visible) {
+        if (!visible) {
             subconfig.classList.add('hidden');
         }
 
@@ -430,7 +429,7 @@
         checkbox.id = 'plus-toggle-' + option.name;
         checkbox.checked = !!toggleSavedStatus;
         checkbox.disabled = !visible;
-        checkbox.onchange = function(){
+        checkbox.onchange = function () {
             updateSubconfigStatus(this, option);
         };
         toggleElement.appendChild(checkbox);
@@ -454,7 +453,7 @@
         return subconfig;
     }
 
-    function createToggleSwitchCSS(){
+    function createToggleSwitchCSS() {
         const cssToggleSwitch =
             `/* Toggle Style */
             
@@ -525,8 +524,7 @@
 
         if (targetCheckbox.checked) {
             feature.enableFunction();
-        }
-        else {
+        } else {
             feature.disableFunction();
         }
 
@@ -534,22 +532,21 @@
     }
 
     //TODO convert to toggle and use el.classList.toggle('hidden');
-    function updateSiblingsVisibility (targetCheckbox, visible) {
+    function updateSiblingsVisibility(targetCheckbox, visible) {
         for (let sibling of targetCheckbox.parentNode.parentNode.children) {
             if (sibling !== targetCheckbox.parentNode) {
-                if (visible){
-                    updateCheckboxEnablement (sibling, true);
+                if (visible) {
+                    updateCheckboxEnablement(sibling, true);
                     sibling.classList.remove('hidden');
-                }
-                else {
+                } else {
                     sibling.classList.add('hidden');
-                    updateCheckboxEnablement (sibling, false);
+                    updateCheckboxEnablement(sibling, false);
                 }
             }
         }
     }
 
-    function updateCheckboxEnablement (targetDiv, enable) {
+    function updateCheckboxEnablement(targetDiv, enable) {
         // Enable checkboxes
         let checkbox = targetDiv.querySelector('input[type=checkbox]');
         checkbox.disabled = !enable;
@@ -562,8 +559,7 @@
         // if enable/disable functions are defined
         if (typeof option.enableFunction !== 'undefined' && targetCheckbox.checked) {
             option.enableFunction();
-        }
-        else if (typeof option.disableFunction !== 'undefined') {
+        } else if (typeof option.disableFunction !== 'undefined') {
             option.disableFunction();
         }
     }
@@ -574,6 +570,7 @@
         // update checkbox value
         GM_setValue('subsettings_' + elNameDownloadAllFilesImages, cb.checked);
     }
+
     function toggleElementsPerPagePosition() {
         // Remove old selector and CSS
         disableElementsPerPage();
@@ -589,7 +586,7 @@
             selectItem.remove();
         });
 
-        if (cssElementsPerPageElement){
+        if (cssElementsPerPageElement) {
             cssElementsPerPageElement.remove();
             cssElementsPerPageElement = undefined;
         }
@@ -618,7 +615,7 @@
     /* Hide Banners */
 
     function enableHideBanners() {
-        if(!cssHideBannersElement) {
+        if (!cssHideBannersElement) {
             const cssHideBanners =
                 `div[class^='HomePageBanner__'] {
                     display: none !important;
@@ -642,7 +639,7 @@
     /* Hide Ads */
 
     function enableHideAds() {
-        if(!cssHideAdsElement) {
+        if (!cssHideAdsElement) {
             const cssHideAds =
                 `div[class^='CardGrid__']:has(> div[class^='AdCard__']),
                  div[class^='AdCard__']{
@@ -751,7 +748,7 @@
         availableOptions.forEach(option => {
             select.add(option);
         });
-        select.onchange = function(){
+        select.onchange = function () {
             const newPerPageValue = parseInt(this.value);
             if (availablePerPageValues.includes(newPerPageValue)) {
                 GM_setValue('elements_per_page', newPerPageValue);
@@ -776,8 +773,7 @@
             // Add html
             filterBySortDiv.parentNode.prepend(htmlElementsPerPage);
             filterBySortDiv.parentNode.append(emptyFilter);
-        }
-        else {
+        } else {
             // Add html
             filterBySortDiv.parentNode.prepend(emptyFilter);
             filterBySortDiv.parentNode.append(htmlElementsPerPage);
@@ -797,7 +793,7 @@
         removeCollectionWindowListener();
     }
 
-    function createSpinnerLoadingCSS(){
+    function createSpinnerLoadingCSS() {
         const cssToggleSwitch =
             `/* Spinner Loading */
             
@@ -831,7 +827,7 @@
         GM_addStyle(cssToggleSwitch);
     }
 
-    function enableSpinnerLoading (target) {
+    function enableSpinnerLoading(target) {
         let spinnerWrapper = document.createElement('div');
         spinnerWrapper.className = 'plus-spinner-wrapper';
 
@@ -843,7 +839,7 @@
         target.prepend(spinnerWrapper);
     }
 
-    function disableSpinnerLoading (target) {
+    function disableSpinnerLoading(target) {
         let spinnerWrapper = target.querySelector('div.plus-spinner-wrapper');
         spinnerWrapper.remove();
     }
@@ -909,7 +905,7 @@
                     let collectThingList = collectThingListFirst.concat(collectThingListBottom);
 
                     collectThingList.forEach(collectButton => {
-                        collectButton.onclick = async function(){
+                        collectButton.onclick = async function () {
                             await sleep(0);
                             selectWrapper.selectedIndex = 0;
                         };
@@ -932,39 +928,39 @@
 
                     // Replace existing option nodes with new ones in all select nodes
                     //selectList.forEach(selectEl => {
-                        // Clone nodes
-                        const newOptionList = optionList.map(option => option.cloneNode(true));
+                    // Clone nodes
+                    const newOptionList = optionList.map(option => option.cloneNode(true));
 
-                        // Replace children
-                        selectWrapper.replaceChildren(...newOptionList);
-                        selectWrapper.selectedIndex = 0;
-                        //TODO if account has no collections select 'create new collection' and trigger selectEl.dispatchEvent(changeEvent);
+                    // Replace children
+                    selectWrapper.replaceChildren(...newOptionList);
+                    selectWrapper.selectedIndex = 0;
+                    //TODO if account has no collections select 'create new collection' and trigger selectEl.dispatchEvent(changeEvent);
 
-                        // Generate button that can be used to 'Create new Collection'
-                        //TODO generate one button and function outside foreach. Inside just clone button and associate function with current select
-                        let plusButton = document.createElement('button');
-                        plusButton.style.cssText = 'width: ' + plusButtonSize + '; height: ' + plusButtonSize + ';';
-                        plusButton.textContent = '+';
-                        plusButton.onclick = function(){
-                            selectWrapper.value = '-1';
-                            const changeEvent = new Event('change', {
-                                bubbles: true
-                            });
-                            selectWrapper.dispatchEvent(changeEvent);
-                        };
+                    // Generate button that can be used to 'Create new Collection'
+                    //TODO generate one button and function outside foreach. Inside just clone button and associate function with current select
+                    let plusButton = document.createElement('button');
+                    plusButton.style.cssText = 'width: ' + plusButtonSize + '; height: ' + plusButtonSize + ';';
+                    plusButton.textContent = '+';
+                    plusButton.onclick = function () {
+                        selectWrapper.value = '-1';
+                        const changeEvent = new Event('change', {
+                            bubbles: true
+                        });
+                        selectWrapper.dispatchEvent(changeEvent);
+                    };
 
-                        // Generate span with button
-                        let plusButtonSpan = generateSpan(plusButton);
+                    // Generate span with button
+                    let plusButtonSpan = generateSpan(plusButton);
 
-                        // Append created span with button after current select
-                        selectWrapper.after(plusButtonSpan);
+                    // Append created span with button after current select
+                    selectWrapper.after(plusButtonSpan);
                     //TODO wait end
                 })
                 .catch((error) => {
                     console.error('Error:', error);
                 })
                 .finally(() => {
-                    disableSpinnerLoading (target);
+                    disableSpinnerLoading(target);
                 });
         }
     }
@@ -1014,16 +1010,16 @@
         return mostRecentIndex;
     }
 
-    function generateSpan(childNode = null){
+    function generateSpan(childNode = null) {
         let spanEl = document.createElement('span');
-        if(childNode){
+        if (childNode) {
             spanEl.appendChild(childNode);
         }
         return spanEl;
     }
 
     function addCollectionWindowListener() {
-        const config = { attributes: false, childList: true, subtree: true };
+        const config = {attributes: false, childList: true, subtree: true};
 
         const callback = (mutationList, observer) => {
             for (const mutation of mutationList) {
@@ -1079,9 +1075,9 @@
             let images = thing.images;
 
             images.forEach(image => {
-                let largeImages = image.sizes.filter( el => {
-                    return el.type==='display' &&
-                        el.size==='large';
+                let largeImages = image.sizes.filter(el => {
+                    return el.type === 'display' &&
+                        el.size === 'large';
                 });
                 let imageUrl = largeImages[0].url;
 
@@ -1117,7 +1113,7 @@
     }
 
     function downloadAllFilesAttach(button) {
-        button.onclick = async function(){
+        button.onclick = async function () {
             downloadAllFiles();
         };
     }
@@ -1149,7 +1145,7 @@
     }
 
     function stripslashes(str) {
-        return (str + '').replace(/\\'/g,'\'').replace(/\"/g,'"').replace(/\\\\/g,'\\').replace(/\\0/g,'\0');
+        return (str + '').replace(/\\'/g, '\'').replace(/\"/g, '"').replace(/\\\\/g, '\\').replace(/\\0/g, '\0');
     }
 
     async function downloadFile(url) {
@@ -1162,7 +1158,7 @@
         return response.arrayBuffer();
     }
 
-    function filenameValidator(fname, { replacement = '�' } = {}) {
+    function filenameValidator(fname, {replacement = '�'} = {}) {
         // https://stackoverflow.com/a/31976060
         // https://gist.github.com/doctaphred/d01d05291546186941e1b7ddc02034d3
 
