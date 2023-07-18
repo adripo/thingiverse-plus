@@ -81,7 +81,7 @@
 
             .plus-settings-button {
                 position: fixed;
-                z-index: 101;
+                z-index: 500;
                 bottom: 10px;
                 right: 10px;
                 border-radius: 3px;
@@ -102,7 +102,7 @@
             .plus-settings-container {
                 position: fixed;
                 transition: max-height 0.3s, max-width 0.3s, visibility 0.3s, opacity 0.3s linear;
-                z-index: 101;
+                z-index: 500;
                 bottom: 70px;
                 right: 10px;
                 max-height: 100%;
