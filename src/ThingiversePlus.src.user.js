@@ -20,6 +20,8 @@
 
 //TODO docs for functions
 //TODO check emenets that need to waitForKeyElements before executing action
+//todo change plus-settings-checkbox with config
+
 (function () {
     'use strict';
 
@@ -37,6 +39,59 @@
     const elNameDownloadAllFiles = 'download-all-files';
     const elNameDownloadAllFilesImages = 'download-all-files-images';
 
+    const features = [
+        {
+            name: 'download-all-files',
+            description: 'Download All Files As Zip',
+            enableFunction: enableDownloadAllFilesBindButton,
+            disableFunction: disableDownloadAllFilesBindButton,
+            options: [
+                {
+                    name: 'download-all-files-images',
+                    description: 'include images',
+                    type: 'checkbox',
+                    enableFunction: toggleDownloadAllFilesImages,
+                    disableFunction: toggleDownloadAllFilesImages,
+                }
+            ]
+        },
+        {
+            name: 'advanced-collections',
+            description: 'Advanced Collections',
+            enableFunction: enableAdvancedCollections,
+            disableFunction: disableAdvancedCollections
+        },
+        {
+            name: 'elements-per-page',
+            description: 'Elements Per Page Selector',
+            enableFunction: enableElementsPerPage,
+            disableFunction: disableElementsPerPage,
+            options: [
+                {
+                    name: 'elements-per-page-position',
+                    description: 'Position',
+                    type: 'toggle',
+                    left: 'Left',
+                    right: 'Right',
+                    enableFunction: toggleElementsPerPagePosition,
+                    disableFunction: toggleElementsPerPagePosition,
+                }
+            ]
+        },
+        {
+            name: 'hide-banners',
+            description: 'Hide Banners',
+            enableFunction: enableHideBanners,
+            disableFunction: disableHideBanners
+        },
+        {
+            name: 'hide-ads',
+            description: 'Hide Ads',
+            enableFunction: enableHideAds,
+            disableFunction: disableHideAds
+        },
+    ];
+
     // Start-up
     setup();
 
@@ -50,20 +105,19 @@
         // Add ThingiversePlus Settings Button
         addPlusSettings();
 
-        // Enable Hide Banners
-        checkAndHideBanners();
+        // Setup features
+        features.forEach(feature => setupFeature(feature));
+    }
 
-        // Enable Hide Ads
-        checkAndHideAds();
+    function setupFeature(feature) {
+        const featureStatus = GM_getValue('settings_' + feature.name, false);
 
-        // Enable Advanced Collections
-        checkAndEnableAdvancedCollections();
-
-        // Enable Elements Per Page
-        checkAndEnableElementsPerPage();
-
-        // Enable 'Download All Files' button
-        checkAndEnableDownloadAllFilesButton();
+        if (featureStatus) {
+            feature.enableFunction();
+        }
+        else {
+            feature.disableFunction();
+        }
     }
 
 
@@ -71,6 +125,9 @@
 
     function addPlusSettings() {
         createPlusSettingsCSS();
+        createToggleSwitchCSS();
+        createSpinnerLoadingCSS();
+
         createSettingsButton();
         createSettingsContainer();
     }
@@ -205,8 +262,6 @@
             }`;
 
         GM_addStyle(cssPlusSettings);
-
-        createToggleSwitchCSS();
     }
 
     function createSettingsButton() {
@@ -231,42 +286,13 @@
 
     function createSettingsContainer() {
         let settingsContainer = document.createElement('div');
-        settingsContainer.classList.add('plus-settings-container')
+        settingsContainer.classList.add('plus-settings-container');
         settingsContainer.classList.add('hidden');
 
-        // Download All Files Button
-        let settingsDownloadAllFilesContainer = document.createElement('div');
-
-        let settingsDownloadAllFiles = createSettingsElement(elNameDownloadAllFiles, 'Download All Files As Zip', checkAndEnableDownloadAllFilesButton);
-        settingsDownloadAllFilesContainer.appendChild(settingsDownloadAllFiles);
-
-        let settingsDownloadAllFilesImages = createSubsettingsCheckboxElement(elNameDownloadAllFilesImages, 'include images', downloadAllFilesImagesOnClick, elNameDownloadAllFiles);
-        settingsDownloadAllFilesContainer.appendChild(settingsDownloadAllFilesImages);
-
-        settingsContainer.appendChild(settingsDownloadAllFilesContainer);
-
-        // Elements Per Page
-        let settingsElementsPerPageContainer = document.createElement('div');
-
-        let settingsElementsPerPage = createSettingsElement(elNameElementsPerPage, 'Elements Per Page Selector', checkAndEnableElementsPerPage);
-        settingsElementsPerPageContainer.appendChild(settingsElementsPerPage);
-
-        let settingsElementsPerPagePosition = createSubsettingsToggleElement(elNameElementsPerPagePosition, 'Position', 'left', 'right', elementsPerPagePositionOnClick, elNameElementsPerPage);
-        settingsElementsPerPageContainer.appendChild(settingsElementsPerPagePosition);
-
-        settingsContainer.appendChild(settingsElementsPerPageContainer);
-
-        // Advanced Collections
-        let settingsAdvancedCollections = createSettingsElement(elNameAdvancedCollections, 'Advanced Collections', checkAndEnableAdvancedCollections);
-        settingsContainer.appendChild(settingsAdvancedCollections);
-
-        // Hide Banners
-        let settingsHideBanners = createSettingsElement(elNameHideBanners, 'Hide Banners', checkAndHideBanners);
-        settingsContainer.appendChild(settingsHideBanners);
-
-        // Hide Ads
-        let settingsHideAds = createSettingsElement(elNameHideAds, 'Hide Ads', checkAndHideAds);
-        settingsContainer.appendChild(settingsHideAds);
+        // Create features
+        features.forEach(feature => {
+            settingsContainer.appendChild(createFeatureConfig(feature));
+        });
 
         document.body.appendChild(settingsContainer);
         addCloseContainerListener();
@@ -287,46 +313,72 @@
         });
     }
 
-    function createSettingsElement(name, description, onChangeFunction) {
-        let settingsElement = document.createElement('div');
+    function createFeatureConfig(feature) {
+        let featureContainer = document.createElement('div');
+        featureContainer.className = 'plus-settings-feature-container';
+
+        let featureConfig = document.createElement('div');
+        featureConfig.className = 'plus-settings-feature-config';
+
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.id = 'plus-checkbox-' + name;
+        checkbox.id = 'plus-checkbox-' + feature.name;
         checkbox.className = 'plus-settings-checkbox';
         checkbox.onchange = function(){
-            onChangeFunction();
+            updateConfigStatus(this, feature);
         };
 
         // Get previously saved value
-        const checkboxSavedStatus = GM_getValue('settings_' + name, false);
+        const checkboxSavedStatus = GM_getValue('settings_' + feature.name, false);
         checkbox.checked = !!checkboxSavedStatus;
 
         let label = document.createElement('label');
         label.htmlFor = checkbox.id;
-        label.innerHTML = description;
+        label.innerHTML = feature.description;
 
-        settingsElement.appendChild(checkbox);
-        settingsElement.appendChild(label);
+        featureConfig.appendChild(checkbox);
+        featureConfig.appendChild(label);
 
-        return settingsElement;
+        featureContainer.appendChild(featureConfig);
+
+        if (feature.options !== undefined){
+            feature.options.forEach(option => {
+                let featureSubconfig = createFeatureSubconfig(option, checkbox.checked)
+                featureContainer.appendChild(featureSubconfig);
+            });
+        }
+
+        return featureContainer;
     }
 
-    function createSubsettingsCheckboxElement(name, description, onChangeFunction, parentName){
-        // Get parent status
-        const parentSavedStatus = GM_getValue('settings_' + parentName, false);
+    function createFeatureSubconfig(option, visible){
+        let featureSubconfig;
 
+        switch (option.type) {
+            case 'checkbox':
+                featureSubconfig = createSubconfigCheckbox(option, visible);
+                break;
+            case 'toggle':
+                featureSubconfig = createSubconfigToggle(option, visible);
+                break;
+        }
+
+        return featureSubconfig;
+    }
+
+    function createSubconfigCheckbox(option, visible){
         // Settings element
-        let settingsElement = document.createElement('div');
-        settingsElement.id = 'plus-settings-' + name;
-        settingsElement.className = 'plus-subsettings-element';
-        if(!parentSavedStatus) {
-            settingsElement.classList.add('hidden');
+        let subconfig = document.createElement('div');
+        subconfig.id = 'plus-settings-' + option.name;
+        subconfig.className = 'plus-subsettings-element';
+        if(!visible) {
+            subconfig.classList.add('hidden');
         }
 
         // Pipe element
         let pipeElement = document.createElement('div');
         pipeElement.className = 'plus-settings-pipe';
-        settingsElement.appendChild(pipeElement);
+        subconfig.appendChild(pipeElement);
 
         // Get previously saved value
         const checkboxSavedStatus = GM_getValue('subsettings_' + name, false);
@@ -334,26 +386,82 @@
         // Checkbox
         let checkboxElement = document.createElement('input');
         checkboxElement.type = 'checkbox';
-        checkboxElement.id = 'plus-checkbox-' + name;
+        checkboxElement.id = 'plus-checkbox-' + option.name;
         checkboxElement.className = 'plus-settings-checkbox';
         checkboxElement.checked = !!checkboxSavedStatus;
-        checkboxElement.disabled = !parentSavedStatus;
+        checkboxElement.disabled = !visible;
         checkboxElement.onchange = function(){
-            onChangeFunction();
+            updateSubconfigStatus(this, option);
         };
-        settingsElement.appendChild(checkboxElement);
+        subconfig.appendChild(checkboxElement);
 
         let labelElement = document.createElement('label');
         labelElement.htmlFor = checkboxElement.id;
-        labelElement.innerHTML = description;
-        settingsElement.appendChild(labelElement);
+        labelElement.innerHTML = option.description;
+        subconfig.appendChild(labelElement);
 
-        return settingsElement;
+        return subconfig;
+    }
+
+    function createSubconfigToggle(option, visible){
+        // Settings element
+        let subconfig = document.createElement('div');
+        subconfig.id = 'plus-settings-' + option.name;
+        subconfig.className = 'plus-subsettings-element';
+        if(!visible) {
+            subconfig.classList.add('hidden');
+        }
+
+        // Pipe element
+        let pipeElement = document.createElement('div');
+        pipeElement.className = 'plus-settings-pipe';
+        subconfig.appendChild(pipeElement);
+
+        // Description span
+        let descriptionElement = document.createElement('span');
+        descriptionElement.innerHTML = option.description + ':';
+        subconfig.appendChild(descriptionElement);
+
+        // Get previously saved value
+        const toggleSavedStatus = GM_getValue('subsettings_' + option.name, false);
+
+        // Toggle switch element
+        let toggleElement = document.createElement('label');
+        toggleElement.className = 'plus-toggle';
+
+        let checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'plus-toggle-' + option.name;
+        checkbox.checked = !!toggleSavedStatus;
+        checkbox.disabled = !visible;
+        checkbox.onchange = function(){
+            updateSubconfigStatus(this, option);
+        };
+        toggleElement.appendChild(checkbox);
+
+        let slider = document.createElement('div');
+        slider.className = 'slider';
+        toggleElement.appendChild(slider);
+
+        let labelLeft = document.createElement('span');
+        labelLeft.className = 'labels';
+        labelLeft.innerHTML = option.left.toUpperCase();
+        toggleElement.appendChild(labelLeft);
+
+        let labelRight = document.createElement('span');
+        labelRight.className = 'labels right';
+        labelRight.innerHTML = option.right.toUpperCase();
+        toggleElement.appendChild(labelRight);
+
+        subconfig.appendChild(toggleElement);
+
+        return subconfig;
     }
 
     function createToggleSwitchCSS(){
         const cssToggleSwitch =
             `/* Toggle Style */
+            
             .plus-toggle {
                 --width: 120px;
                 --height: calc(var(--width) / 6);
@@ -415,189 +523,66 @@
         GM_addStyle(cssToggleSwitch);
     }
 
-    function createSubsettingsToggleElement(name, description, option_off, option_on, onChangeFunction, parentName) {
-        // Get parent status
-        const parentSavedStatus = GM_getValue('settings_' + parentName, false);
+    function updateConfigStatus(targetCheckbox, feature) {
+        // update config value
+        GM_setValue('settings_' + feature.name, targetCheckbox.checked);
 
-        // Settings element
-        let settingsElement = document.createElement('div');
-        settingsElement.id = 'plus-settings-' + name;
-        settingsElement.className = 'plus-subsettings-element';
-        if(!parentSavedStatus) {
-            settingsElement.classList.add('hidden');
-        }
-
-        // Pipe element
-        let pipeElement = document.createElement('div');
-        pipeElement.className = 'plus-settings-pipe';
-        settingsElement.appendChild(pipeElement);
-
-        // Description span
-        let descriptionElement = document.createElement('span');
-        descriptionElement.innerHTML = description + ':';
-        settingsElement.appendChild(descriptionElement);
-
-        // Get previously saved value
-        const toggleSavedStatus = GM_getValue('subsettings_' + name, false);
-
-        // Toggle switch element
-        let toggleElement = document.createElement('label');
-        toggleElement.className = 'plus-toggle';
-
-        let checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = 'plus-toggle-' + name;
-        checkbox.checked = !!toggleSavedStatus;
-        checkbox.disabled = !parentSavedStatus;
-        checkbox.onchange = function(){
-            onChangeFunction();
-        };
-        toggleElement.appendChild(checkbox);
-
-        let slider = document.createElement('div');
-        slider.className = 'slider';
-        toggleElement.appendChild(slider);
-
-        let labelLeft = document.createElement('span');
-        labelLeft.className = 'labels';
-        labelLeft.innerHTML = option_off.toUpperCase();
-        toggleElement.appendChild(labelLeft);
-
-        let labelRight = document.createElement('span');
-        labelRight.className = 'labels right';
-        labelRight.innerHTML = option_on.toUpperCase();
-        toggleElement.appendChild(labelRight);
-
-        settingsElement.appendChild(toggleElement);
-
-        return settingsElement;
-    }
-
-    function checkAndHideBanners() {
-        let cb = document.getElementById('plus-checkbox-' + elNameHideBanners);
-
-        // update checkbox value
-        GM_setValue('settings_' + elNameHideBanners, cb.checked);
-
-        if (cb.checked) {
-            hideBanners();
+        if (targetCheckbox.checked) {
+            feature.enableFunction();
         }
         else {
-            unhideBanners();
+            feature.disableFunction();
         }
+
+        updateSiblingsVisibility(targetCheckbox, targetCheckbox.checked);
     }
 
-    function checkAndHideAds() {
-        let cb = document.getElementById('plus-checkbox-' + elNameHideAds);
-
-        // update checkbox value
-        GM_setValue('settings_' + elNameHideAds, cb.checked);
-
-        if (cb.checked) {
-            const pathname = window.location.pathname;
-            if (pathname.startsWith('/thing:')) {
-                // Set 6 elements per page in 'More' section
-                changeElementsPerPage(6);
-            }
-
-            hideAds();
-        }
-        else {
-            unhideAds();
-        }
-    }
-
-    function checkAndEnableAdvancedCollections() {
-        let cb = document.getElementById('plus-checkbox-' + elNameAdvancedCollections);
-
-        // get last checkbox status
-        const cbLastStatus = GM_getValue('settings_' + elNameAdvancedCollections, false);
-
-        // update checkbox value
-        GM_setValue('settings_' + elNameAdvancedCollections, cb.checked);
-
-        if (cb.checked) {
-            enableAdvancedCollections();
-        }
-        else {
-            // check last status and reload if changed
-            if (!!cbLastStatus) {
-                window.location.reload();
+    function updateSiblingsVisibility (targetCheckbox, visible) {
+        for (let sibling of targetCheckbox.parentNode.parentNode.children) {
+            if (sibling !== targetCheckbox.parentNode) {
+                if (visible){
+                    updateCheckboxEnablement (sibling, true);
+                    sibling.classList.remove('hidden');
+                }
+                else {
+                    sibling.classList.add('hidden');
+                    updateCheckboxEnablement (sibling, false);
+                }
             }
         }
     }
 
-    function checkAndEnableElementsPerPage() {
-        let cb = document.getElementById('plus-checkbox-' + elNameElementsPerPage);
-
-        // get last checkbox status
-        const cbLastStatus = GM_getValue('settings_' + elNameElementsPerPage, false);
-
-        // update checkbox value
-        GM_setValue('settings_' + elNameElementsPerPage, cb.checked);
-
-        // If checkbox is clicked
-        if (cb.checked !== cbLastStatus) {
-            // Toggle subSettings elements
-            toggleChildSettings(elNameElementsPerPagePosition);
-        }
-
-        if (cb.checked) {
-            // If was disabled
-
-
-            enableElementsPerPage();
-        }
-        else{
-            if (!!cbLastStatus) {
-                disableElementsPerPage();
-            }
-        }
-
-
+    function updateCheckboxEnablement (targetDiv, enable) {
+        // Enable checkboxes
+        let checkbox = targetDiv.querySelector('input[type=checkbox]');
+        checkbox.disabled = !enable;
     }
 
-    function checkAndEnableDownloadAllFilesButton() {
-        let cb = document.getElementById('plus-checkbox-' + elNameDownloadAllFiles);
+    function updateSubconfigStatus(targetCheckbox, option) {
+        // update config value
+        GM_setValue('subsettings_' + option.name, targetCheckbox.checked);
 
-        // get last checkbox status
-        const cbLastStatus = GM_getValue('settings_' + elNameDownloadAllFiles, false);
-
-        // update checkbox value
-        GM_setValue('settings_' + elNameDownloadAllFiles, cb.checked);
-
-        // If checkbox is clicked
-        if (cb.checked !== cbLastStatus) {
-            // Toggle subSettings elements
-            toggleChildSettings(elNameDownloadAllFilesImages);
+        // if enable/disable functions are defined
+        if (typeof option.enableFunction !== 'undefined' && targetCheckbox.checked) {
+            option.enableFunction();
         }
-
-        if (cb.checked) {
-            enableDownloadAllFilesBindButton();
-        }
-        else{
-            disableDownloadAllFilesBindButton();
+        else if (typeof option.disableFunction !== 'undefined') {
+            option.disableFunction();
         }
     }
 
-    function elementsPerPagePositionOnClick() {
-        let cb = document.getElementById('plus-toggle-' + elNameElementsPerPagePosition);
-
-        // update checkbox value
-        GM_setValue('subsettings_' + elNameElementsPerPagePosition, cb.checked);
-
-        // Remove old selector and CSS
-        disableElementsPerPage();
-
-        // Recall creation function
-        checkAndEnableElementsPerPage();
-    }
-
-    function downloadAllFilesImagesOnClick() {
+    function toggleDownloadAllFilesImages() {
         let cb = document.getElementById('plus-checkbox-' + elNameDownloadAllFilesImages);
 
         // update checkbox value
         GM_setValue('subsettings_' + elNameDownloadAllFilesImages, cb.checked);
+    }
+    function toggleElementsPerPagePosition() {
+        // Remove old selector and CSS
+        disableElementsPerPage();
+
+        // Recall creation function
+        enableElementsPerPage();
     }
 
     function disableElementsPerPage() {
@@ -626,11 +611,7 @@
         let el = document.getElementById('plus-settings-' + elementName);
         el.classList.toggle('hidden');
 
-        // Enable checkboxes
-        let checkboxes = Array.from(el.querySelectorAll('input[type=checkbox]'));
-        checkboxes.forEach(checkbox => {
-            checkbox.disabled = !checkbox.disabled;
-        });
+
     }
 
     /* Suggested Elements Number */
