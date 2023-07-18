@@ -661,7 +661,8 @@
     function hideAds() {
         if(!cssHideAdsElement) {
             const cssHideAds =
-                `div[class^='AdCard__'] {
+                `div[class^='CardGrid__']:has(> div[class^='AdCard__']),
+                 div[class^='AdCard__']{
                     display: none !important;
                 }`;
 
