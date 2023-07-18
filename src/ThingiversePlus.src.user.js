@@ -633,6 +633,15 @@
         });
     }
 
+    /* Suggested Elements Number */
+
+    function enableSuggestedElementsNumber() {
+        const pathname = window.location.pathname;
+        if (pathname.startsWith('/thing:')) {
+            // Set 6 elements per page in 'More' section
+            changeElementsPerPage(6);
+        }
+    }
 
     /* Hide Banners */
 
@@ -670,6 +679,8 @@
 
             cssHideAdsElement = GM_addStyle(cssHideAds);
         }
+
+        enableSuggestedElementsNumber(); //todo create custom settings
     }
 
     function disableHideAds() {
