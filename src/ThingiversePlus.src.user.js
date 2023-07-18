@@ -938,6 +938,15 @@
 
                     /*** end workaround */
 
+                    let collectWindowBody = target.querySelector('div[class^="CollectThingWindow__collectWindowBody"]');
+                    collectWindowBody.style.cssText = 'flex-flow: row wrap;';
+
+                    let bodyTextWrapper = target.querySelector('span[class^="CollectThingWindow__bodyTextWrapper"]');
+                    bodyTextWrapper.style.cssText = 'width: 100%;';
+
+                    let selectWrapper = target.querySelector('select[class^="CollectThingWindow__selectWrapper"]');
+                    selectWrapper.style.cssText = 'max-width: calc(100% - ' + plusButtonSize + ' - 10px );flex-grow: 1;';
+
                     // Replace existing option nodes with new ones in all select nodes
                     //selectList.forEach(selectEl => {
                         // Clone nodes
