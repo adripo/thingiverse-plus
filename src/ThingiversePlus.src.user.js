@@ -31,12 +31,8 @@
     let cssElementsPerPageElement;
     let advancedCollectionObserver;
 
-    const elNameHideBanners = 'hide-banners';
-    const elNameHideAds = 'hide-ads';
-    const elNameAdvancedCollections = 'advanced-collections';
-    const elNameElementsPerPage = 'elements-per-page';
+    //TODO remove following const and use them from features var.
     const elNameElementsPerPagePosition = 'elements-per-page-position';
-    const elNameDownloadAllFiles = 'download-all-files';
     const elNameDownloadAllFilesImages = 'download-all-files-images';
 
     const features = [
@@ -608,12 +604,6 @@
         }
     }
 
-    function toggleChildSettings(elementName){
-        let el = document.getElementById('plus-settings-' + elementName);
-        el.classList.toggle('hidden');
-
-
-    }
 
     /* Suggested Elements Number */
 
