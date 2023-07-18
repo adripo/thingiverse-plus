@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      2.0.2
+// @version      2.0.3
 // @description  Thingiverse with extra features
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -707,7 +707,7 @@
                 height: 30px;
                 cursor: pointer;
                 border: 0;
-                border-left: 1px solid rgba(85, 85, 85, .8);
+                border-left: 1px solid #eee;
                 color: #555;
             }
 
