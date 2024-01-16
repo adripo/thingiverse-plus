@@ -10,7 +10,7 @@
 // @downloadURL  https://raw.githubusercontent.com/adripo/thingiverse-plus/main/ThingiversePlus.user.js
 // @supportURL   https://github.com/adripo/thingiverse-plus/issues
 // @match        https://www.thingiverse.com/*
-// @require      https://cdn.jsdelivr.net/gh/CoeJoder/waitForKeyElements.js@v1.2/waitForKeyElements.js
+// @require      https://cdn.jsdelivr.net/gh/CoeJoder/GM_wrench@v1.3/dist/GM_wrench.min.js
 // @require      https://raw.githubusercontent.com/eligrey/FileSaver.js/master/src/FileSaver.js
 // @require      https://raw.githubusercontent.com/Stuk/jszip/master/dist/jszip.min.js
 // @grant        GM_addStyle
@@ -1107,7 +1107,7 @@
         if (downloadButton) {
             downloadAllFilesAttach(downloadButton);
         } else {
-            waitForKeyElements(sidebarMenuBtnSelector, (loadedDownloadButton) => {
+            GM_wrench.waitForKeyElements(sidebarMenuBtnSelector, (loadedDownloadButton) => {
                 downloadAllFilesAttach(loadedDownloadButton);
             });
         }
@@ -1127,7 +1127,7 @@
         if (downloadButton) {
             downloadAllFilesDetach(downloadButton);
         } else {
-            waitForKeyElements(sidebarMenuBtnSelector, (loadedDownloadButton) => {
+            GM_wrench.waitForKeyElements(sidebarMenuBtnSelector, (loadedDownloadButton) => {
                 downloadAllFilesDetach(loadedDownloadButton);
             });
         }
