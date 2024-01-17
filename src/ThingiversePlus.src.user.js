@@ -797,10 +797,10 @@
     function createSpinnerLoadingCSS() {
         const cssToggleSwitch =
             `/* Spinner Loading */
-            
+
             .plus-spinner-wrapper {
                 display: flex;
-                position: absolute;                
+                position: absolute;
                 background: rgba(0,0,0,0.6);
                 left: 0;
                 top: 0;
@@ -808,9 +808,9 @@
                 width: 100%;
                 align-items: center;
                 justify-content: center;
-                z-index: 1;                
+                z-index: 1;
             }
-    
+
             .plus-spinner-loading {
                 background-image: url(https://cdn.thingiverse.com/site/assets/inline-icons/19420d877d0e95abb31b.svg);
                 background-repeat: no-repeat;
@@ -819,10 +819,10 @@
                 width: 117px;
                 animation: plus-spin 7s linear infinite;
             }
-            @keyframes plus-spin { 
-                100% { 
-                    transform:rotate(360deg); 
-                } 
+            @keyframes plus-spin {
+                100% {
+                    transform:rotate(360deg);
+                }
             }`;
 
         GM_addStyle(cssToggleSwitch);
