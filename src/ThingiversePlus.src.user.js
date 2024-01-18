@@ -457,7 +457,7 @@
     function createToggleSwitchCSS() {
         const cssToggleSwitch =
             `/* Toggle Style */
-            
+
             .plus-toggle {
                 --width: 120px;
                 --height: calc(var(--width) / 6);
