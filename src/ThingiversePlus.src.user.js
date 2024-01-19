@@ -19,7 +19,7 @@
 // ==/UserScript==
 
 //TODO docs for functions
-//TODO check emenets that need to waitForKeyElements before executing action
+//TODO check elements that need to waitForKeyElements before executing action
 //todo change plus-settings-checkbox with config
 //todo convert styles; example: var.style.cssText = 'display: none;'; into createNewOption.style.display = 'none;';
 
