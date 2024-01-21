@@ -35,6 +35,15 @@
     //TODO remove following const and use them from features var.
     const elNameElementsPerPagePosition = 'elements-per-page-position';
     const elNameDownloadAllFilesImages = 'download-all-files-images';
+    
+    // Feature ids
+    const idDownloadAllFiles = 'download-all-files';
+    const idDownloadAllFilesImages = 'images';
+    const idAdvancedCollections = 'advanced-collections';
+    const idElementsPerPage = 'elements-per-page';
+    const idElementsPerPagePositionRight = 'position-right';
+    const idHideBanners = 'hide-banners';
+    const idHideAds = 'hide-ads';
 
     const features = [
         {
