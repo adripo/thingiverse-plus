@@ -47,13 +47,13 @@
 
     const features = [
         {
-            name: 'download-all-files',
+            id: idDownloadAllFiles,
             description: 'Download All Files As Zip',
             enableFunction: enableDownloadAllFilesBindButton,
             disableFunction: disableDownloadAllFilesBindButton,
             options: [
                 {
-                    name: 'download-all-files-images',
+                    id: idDownloadAllFilesImages,
                     description: 'include images',
                     type: 'checkbox',
                     enableFunction: toggleDownloadAllFilesImages,
@@ -62,19 +62,19 @@
             ]
         },
         {
-            name: 'advanced-collections',
+            id: idAdvancedCollections,
             description: 'Advanced Collections',
             enableFunction: enableAdvancedCollections,
             disableFunction: disableAdvancedCollections
         },
         {
-            name: 'elements-per-page',
+            id: idElementsPerPage,
             description: 'Elements Per Page Selector',
             enableFunction: enableElementsPerPage,
             disableFunction: disableElementsPerPage,
             options: [
                 {
-                    name: 'elements-per-page-position',
+                    id: idElementsPerPagePositionRight,
                     description: 'Position',
                     type: 'toggle',
                     left: 'Left',
@@ -85,13 +85,13 @@
             ]
         },
         {
-            name: 'hide-banners',
+            id: idHideBanners,
             description: 'Hide Banners',
             enableFunction: enableHideBanners,
             disableFunction: disableHideBanners
         },
         {
-            name: 'hide-ads',
+            id: idHideAds,
             description: 'Hide Ads',
             enableFunction: enableHideAds,
             disableFunction: disableHideAds
@@ -116,7 +116,7 @@
     }
 
     function setupFeature(feature) {
-        const featureStatus = GM_getValue('settings_' + feature.name, false);
+        const featureStatus = GM_getValue('settings_' + feature.id, false);
 
         if (featureStatus) {
             feature.enableFunction();
@@ -327,14 +327,14 @@
 
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.id = 'plus-checkbox-' + feature.name;
+        checkbox.id = 'plus-checkbox-' + feature.id;
         checkbox.className = 'plus-settings-checkbox';
         checkbox.onchange = function () {
             updateConfigStatus(this, feature);
         };
 
         // Get previously saved value
-        const checkboxSavedStatus = GM_getValue('settings_' + feature.name, false);
+        const checkboxSavedStatus = GM_getValue('settings_' + feature.id, false);
         checkbox.checked = !!checkboxSavedStatus;
 
         let label = document.createElement('label');
@@ -374,7 +374,7 @@
     function createSubconfigCheckbox(option, visible) {
         // Settings element
         let subconfig = document.createElement('div');
-        subconfig.id = 'plus-settings-' + option.name;
+        subconfig.id = 'plus-settings-' + option.id;
         subconfig.className = 'plus-subsettings-element';
         if (!visible) {
             subconfig.classList.add('hidden');
@@ -391,7 +391,7 @@
         // Checkbox
         let checkboxElement = document.createElement('input');
         checkboxElement.type = 'checkbox';
-        checkboxElement.id = 'plus-checkbox-' + option.name;
+        checkboxElement.id = 'plus-checkbox-' + option.id;
         checkboxElement.className = 'plus-settings-checkbox';
         checkboxElement.checked = !!checkboxSavedStatus;
         checkboxElement.disabled = !visible;
@@ -411,7 +411,7 @@
     function createSubconfigToggle(option, visible) {
         // Settings element
         let subconfig = document.createElement('div');
-        subconfig.id = 'plus-settings-' + option.name;
+        subconfig.id = 'plus-settings-' + option.id;
         subconfig.className = 'plus-subsettings-element';
         if (!visible) {
             subconfig.classList.add('hidden');
@@ -428,7 +428,7 @@
         subconfig.appendChild(descriptionElement);
 
         // Get previously saved value
-        const toggleSavedStatus = GM_getValue('subsettings_' + option.name, false);
+        const toggleSavedStatus = GM_getValue('subsettings_' + option.id, false);
 
         // Toggle switch element
         let toggleElement = document.createElement('label');
@@ -436,7 +436,7 @@
 
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.id = 'plus-toggle-' + option.name;
+        checkbox.id = 'plus-toggle-' + option.id;
         checkbox.checked = !!toggleSavedStatus;
         checkbox.disabled = !visible;
         checkbox.onchange = function () {
