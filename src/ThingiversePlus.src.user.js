@@ -408,7 +408,7 @@
         return subconfig;
     }
 
-    function createSubconfigToggle(option, visible) {
+    function createSubconfigToggle(feature, option, visible) {
         // Settings element
         let subconfig = document.createElement('div');
         subconfig.id = 'plus-settings-' + option.id;
