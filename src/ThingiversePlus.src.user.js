@@ -361,17 +361,17 @@
 
         switch (option.type) {
             case 'checkbox':
-                featureSubconfig = createSubconfigCheckbox(option, visible);
+                featureSubconfig = createSubconfigCheckbox(feature, option, visible);
                 break;
             case 'toggle':
-                featureSubconfig = createSubconfigToggle(option, visible);
+                featureSubconfig = createSubconfigToggle(feature, option, visible);
                 break;
         }
 
         return featureSubconfig;
     }
 
-    function createSubconfigCheckbox(option, visible) {
+    function createSubconfigCheckbox(feature, option, visible) {
         // Settings element
         let subconfig = document.createElement('div');
         subconfig.id = 'plus-settings-' + option.id;
