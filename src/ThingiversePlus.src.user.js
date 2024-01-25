@@ -396,7 +396,7 @@
         checkboxElement.checked = !!checkboxSavedStatus;
         checkboxElement.disabled = !visible;
         checkboxElement.onchange = function () {
-            updateSubconfigStatus(this, option);
+            updateConfigStatus(this, feature, option);
         };
         subconfig.appendChild(checkboxElement);
 
@@ -440,7 +440,7 @@
         checkbox.checked = !!toggleSavedStatus;
         checkbox.disabled = !visible;
         checkbox.onchange = function () {
-            updateSubconfigStatus(this, option);
+            updateConfigStatus(this, feature, option);
         };
         toggleElement.appendChild(checkbox);
 
@@ -528,7 +528,7 @@
         GM_addStyle(cssToggleSwitch);
     }
 
-    function updateConfigStatus(targetCheckbox, feature) {
+    function updateConfigStatus(targetCheckbox, feature, option) {
         // update config value
         GM_setValue('settings_' + feature.name, targetCheckbox.checked);
 
