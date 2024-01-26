@@ -562,18 +562,6 @@
         checkbox.disabled = !enable;
     }
 
-    function updateSubconfigStatus(targetCheckbox, option) {
-        // update config value
-        GM_setValue('subsettings_' + option.name, targetCheckbox.checked);
-
-        // if enable/disable functions are defined
-        if (typeof option.enableFunction !== 'undefined' && targetCheckbox.checked) {
-            option.enableFunction();
-        } else if (typeof option.disableFunction !== 'undefined') {
-            option.disableFunction();
-        }
-    }
-
     function toggleDownloadAllFilesImages() {
         let cb = document.getElementById('plus-checkbox-' + elNameDownloadAllFilesImages);
 
