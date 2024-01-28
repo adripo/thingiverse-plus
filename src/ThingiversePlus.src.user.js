@@ -529,16 +529,29 @@
     }
 
     function updateConfigStatus(targetCheckbox, feature, option) {
-        // update config value
-        GM_setValue('settings_' + feature.name, targetCheckbox.checked);
+        if (option === undefined) {
+            // update config value
+            GM_setValue('settings_' + feature.id, targetCheckbox.checked);
 
-        if (targetCheckbox.checked) {
-            feature.enableFunction();
-        } else {
-            feature.disableFunction();
+            if (targetCheckbox.checked) {
+                feature.enableFunction();
+            } else {
+                feature.disableFunction();
+            }
+
+            updateSiblingsVisibility(targetCheckbox, targetCheckbox.checked);
         }
+        else {
+            // update config value
+            GM_setValue('settings_' + feature.id + '_' + option.id, targetCheckbox.checked);
 
-        updateSiblingsVisibility(targetCheckbox, targetCheckbox.checked);
+            // if enable/disable functions are defined
+            if (typeof option.enableFunction !== 'undefined' && targetCheckbox.checked) {
+                option.enableFunction();
+            } else if (typeof option.disableFunction !== 'undefined') {
+                option.disableFunction();
+            }
+        }
     }
 
     //TODO convert to toggle and use el.classList.toggle('hidden');
