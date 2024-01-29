@@ -528,6 +528,15 @@
         GM_addStyle(cssToggleSwitch);
     }
 
+    function getConfigStatus(idFeature, idOption) {
+        if (idOption === undefined) {
+            return GM_getValue('settings_' + idFeature, false);
+        }
+        else {
+            return GM_getValue('settings_' + idFeature + '_' + idOption, false);
+        }
+    }
+
     function updateConfigStatus(targetCheckbox, feature, option) {
         if (option === undefined) {
             // update config value
