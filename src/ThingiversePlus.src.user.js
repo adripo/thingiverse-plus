@@ -391,7 +391,7 @@
         // Checkbox
         let checkboxElement = document.createElement('input');
         checkboxElement.type = 'checkbox';
-        checkboxElement.id = 'plus-checkbox-' + option.id;
+        checkboxElement.id = 'plus-checkbox-' + feature.id + '-' + option.id;
         checkboxElement.className = 'plus-settings-checkbox';
         checkboxElement.checked = !!checkboxSavedStatus;
         checkboxElement.disabled = !visible;
