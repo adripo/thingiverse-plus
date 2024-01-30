@@ -386,7 +386,7 @@
         subconfig.appendChild(pipeElement);
 
         // Get previously saved value
-        const checkboxSavedStatus = GM_getValue('subsettings_' + name, false);
+        const checkboxSavedStatus = getConfigStatus(feature.id, option.id);
 
         // Checkbox
         let checkboxElement = document.createElement('input');
@@ -428,7 +428,7 @@
         subconfig.appendChild(descriptionElement);
 
         // Get previously saved value
-        const toggleSavedStatus = GM_getValue('subsettings_' + option.id, false);
+        const toggleSavedStatus = getConfigStatus(feature.id, option.id);
 
         // Toggle switch element
         let toggleElement = document.createElement('label');
@@ -615,7 +615,7 @@
     function enableElementsPerPage() {
         const pathname = window.location.pathname;
         if (pathname === '/' || pathname === '/search') {
-            const positionRightStatus = GM_getValue('subsettings_' + elNameElementsPerPagePosition, false);
+            const positionRightStatus = getConfigStatus(idElementsPerPage, idElementsPerPagePositionRight);
 
             enablePerPageSelect(positionRightStatus);
         }
@@ -1087,7 +1087,7 @@
         });
 
         // Include images
-        const includeImages = GM_getValue('subsettings_' + elNameDownloadAllFilesImages, false);
+        const includeImages = getConfigStatus(idDownloadAllFiles, idDownloadAllFilesImages);
 
         if (includeImages) {
             let imgFolder = zip.folder('images');
