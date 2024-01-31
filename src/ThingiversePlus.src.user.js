@@ -31,10 +31,6 @@
     let cssHideAdsElement;
     let cssElementsPerPageElement;
     let advancedCollectionObserver;
-
-    //TODO remove following const and use them from features var.
-    const elNameElementsPerPagePosition = 'elements-per-page-position';
-    const elNameDownloadAllFilesImages = 'download-all-files-images';
     
     // Feature ids
     const idDownloadAllFiles = 'download-all-files';
