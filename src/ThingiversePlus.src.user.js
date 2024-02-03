@@ -657,8 +657,7 @@
     function enableHideAds() {
         if (!cssHideAdsElement) {
             const cssHideAds =
-                `div[class^='CardGrid__']:has(> div[class^='AdCard__']),
-                 div[class^='AdCard__']{
+                `div[class^='ItemCardContainer__']:has(> div[class^='ItemCardHeader__'][title='Advertisement']) {
                     display: none !important;
                 }`;
 
