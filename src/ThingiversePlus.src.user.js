@@ -783,16 +783,19 @@
         cssElementsPerPageElement = GM_addStyle(cssElementsPerPage);
 
         // Add html
-        const filterBySortDiv = document.querySelector('div[class^="FilterBySort__dropdown--"]');
-        if (!positionRight) {
-            // Add html
-            filterBySortDiv.parentNode.prepend(htmlElementsPerPage);
-            filterBySortDiv.parentNode.append(emptyFilter);
-        } else {
-            // Add html
-            filterBySortDiv.parentNode.prepend(emptyFilter);
-            filterBySortDiv.parentNode.append(htmlElementsPerPage);
-        }
+        const searchFilterBar = 'div[class^="SearchFilterBar__"]'
+
+        GM_wrench.waitForKeyElements(searchFilterBar, (loadedSearchFilterBar) => {
+            if (!positionRight) {
+                // Add html
+                loadedSearchFilterBar.prepend(htmlElementsPerPage);
+                loadedSearchFilterBar.append(emptyFilter);
+            } else {
+                // Add html
+                loadedSearchFilterBar.prepend(emptyFilter);
+                loadedSearchFilterBar.append(htmlElementsPerPage);
+            }
+        });
     }
 
 
