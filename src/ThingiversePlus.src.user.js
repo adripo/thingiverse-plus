@@ -112,7 +112,7 @@
     }
 
     function setupFeature(feature) {
-        const featureStatus = GM_getValue('settings_' + feature.id, false);
+        const featureStatus = getConfigStatus(feature.id);
 
         if (featureStatus) {
             feature.enableFunction();
@@ -330,7 +330,7 @@
         };
 
         // Get previously saved value
-        const checkboxSavedStatus = GM_getValue('settings_' + feature.id, false);
+        const checkboxSavedStatus = getConfigStatus(feature.id);
         checkbox.checked = !!checkboxSavedStatus;
 
         let label = document.createElement('label');
