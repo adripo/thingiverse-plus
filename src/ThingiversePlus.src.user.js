@@ -525,7 +525,7 @@
     }
 
     function getConfigStatus(idFeature, idOption) {
-        if (idOption === undefined) {
+        if (typeof idOption === 'undefined') {
             return GM_getValue('settings_' + idFeature, false);
         }
         else {
@@ -534,7 +534,7 @@
     }
 
     function updateConfigStatus(targetCheckbox, feature, option) {
-        if (option === undefined) {
+        if (typeof option === 'undefined') {
             // update config value
             GM_setValue('settings_' + feature.id, targetCheckbox.checked);
 
