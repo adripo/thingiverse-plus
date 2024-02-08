@@ -783,9 +783,11 @@
         cssElementsPerPageElement = GM_addStyle(cssElementsPerPage);
 
         // Add html
-        const searchFilterBar = 'div[class^="SearchFilterBar__"]'
+        const searchFilterBar = 'div[class^="SearchFilterBar__"]';
+        const elSearchFilterBar = document.querySelector(searchFilterBar);
 
-        GM_wrench.waitForKeyElements(searchFilterBar, (loadedSearchFilterBar) => {
+        // Callback function to execute when mutations are observed
+        const addBarOption = (loadedSearchFilterBar, positionRight) => {
             if (!positionRight) {
                 // Add html
                 loadedSearchFilterBar.prepend(htmlElementsPerPage);
@@ -795,7 +797,17 @@
                 loadedSearchFilterBar.prepend(emptyFilter);
                 loadedSearchFilterBar.append(htmlElementsPerPage);
             }
-        });
+        };
+
+        // if element already present, else wait for load
+        if(elSearchFilterBar) {
+            addBarOption(elSearchFilterBar, positionRight);
+        }
+        else {
+            GM_wrench.waitForKeyElements(searchFilterBar, (loadedSearchFilterBar) => {
+                addBarOption(loadedSearchFilterBar, positionRight);
+            });
+        }
     }
 
 
