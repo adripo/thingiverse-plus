@@ -579,6 +579,95 @@
         let checkbox = targetDiv.querySelector('input[type=checkbox]');
         checkbox.disabled = !enable;
     }
+    /* Graphical Improvements */
+
+    function enableGraphicalImprovements() {
+        if (!cssGraphicalImprovementsElement) {
+            const cssGraphicalImprovements =
+                `/* Graphical Improvements Style */
+    
+                div[class^='HomePage__homePage--'] {
+                    transition: all 0.3s ease;
+                }
+                
+                div[class^='PageHeader__headerPlaceholder--'],
+                div[class^='PageHeader__headerWrapper'] {
+                    min-width: 348px;
+                }
+                
+                @media (max-width: 620px) {
+                    div[class^='ItemCardGrid__itemCardGrid--'] {
+                        grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+                    }
+                }
+    
+                @media (min-width: 1025px) and (max-width: 1043px) {
+                    div[class^='PageHeader__headerPlaceholder--'],
+                    div[class^='PageHeader__headerWrapper--'] {
+                        height: 85px;
+                    }
+                    
+                    div[class^='PageHeader__headerPlaceholder--'][class*='PageHeader__siteNotification--'],
+                    div[class^='PageHeader__headerWrapper--'][class*='PageHeader__siteNotification--'] {
+                        height: 125px;
+                    }
+    
+                    div[class^='PageHeader__header--'] {
+                        -ms-flex-wrap:wrap;
+                        flex-wrap: wrap;
+                        gap: normal;
+                        padding: 0 5px 5px;
+                    }
+                
+                    div[class^='PageHeader__header--'] div[class^='PageHeader__navBar--'] {
+                        -webkit-box-ordinal-group: 3;
+                        -ms-flex-order: 2;
+                        order: 2;
+                    }
+                
+                    div[class^='PageHeader__header--'] div[class*='PageHeader__searchBar--'] {
+                        -webkit-box-ordinal-group: 4;
+                        -ms-flex-order: 3;
+                        order: 3;
+                    }
+                    
+                    div[class*='PageHeader__searchBar--'] {
+                        max-width: none;
+                    }
+                }
+                
+                div[class^='SearchFilterBar__searchFilterBar--'] {
+                    grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+                    display: grid;
+                    row-gap: 18px;
+                    column-gap: 24px;
+                }
+                
+                div[class^='SearchFilterBar__searchFilterBar--'] > * {
+                    width: 100% !important;
+                }
+                
+                div[class^='SearchFilterBar__searchFilterBar--'] > :last-child:nth-child(3n-1),
+                div[class^='SearchFilterBar__searchFilterBar--'] > :nth-last-child(2):nth-child(3n+1) {
+                    grid-column-end: auto;
+                }
+                
+                @media (max-width: 720px) {
+                    .SearchFilterBar__searchFilterBar--RIie5 {
+                        column-gap: 24px;
+                    }
+                }`;
+
+            cssGraphicalImprovementsElement = GM_addStyle(cssGraphicalImprovements);
+        }
+    }
+
+    function disableGraphicalImprovements() {
+        if (cssGraphicalImprovementsElement) {
+            cssGraphicalImprovementsElement.remove();
+            cssGraphicalImprovementsElement = undefined;
+        }
+    }
 
     function toggleDownloadAllFilesImages() {
         let cb = document.getElementById('plus-checkbox-' + elNameDownloadAllFilesImages);
