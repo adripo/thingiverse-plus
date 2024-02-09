@@ -34,6 +34,7 @@
     let advancedCollectionObserver;
     
     // Feature ids
+    const idGraphicalImprovements = 'graphical-improvements';
     const idDownloadAllFiles = 'download-all-files';
     const idDownloadAllFilesImages = 'images';
     const idAdvancedCollections = 'advanced-collections';
@@ -43,6 +44,12 @@
     const idHideAds = 'hide-ads';
 
     const features = [
+        {
+            id: idGraphicalImprovements,
+            description: 'Graphical Improvements',
+            enableFunction: enableGraphicalImprovements,
+            disableFunction: disableGraphicalImprovements,
+        },
         {
             id: idDownloadAllFiles,
             description: 'Download All Files As Zip',
