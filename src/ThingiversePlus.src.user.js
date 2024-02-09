@@ -27,6 +27,7 @@
     'use strict';
 
     // Global variables
+    let cssGraphicalImprovementsElement;
     let cssHideBannersElement;
     let cssHideAdsElement;
     let cssElementsPerPageElement;
