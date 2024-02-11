@@ -33,7 +33,7 @@
     let cssHideAdsElement;
     let cssElementsPerPageElement;
     let advancedCollectionObserver;
-    
+
     // Feature ids
     const idGraphicalImprovements = 'graphical-improvements';
     const idDownloadAllFiles = 'download-all-files';
