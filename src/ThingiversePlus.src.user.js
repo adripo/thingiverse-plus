@@ -796,40 +796,73 @@
 
         // Generate CSS
         const cssElementsPerPage =
-            `.plus-elements-per-page {
-                background-color: #fff;
-                width: 300px;
+            `/* Elements Per Page Style */
+    
+            .plus-elements-per-page {
+                position: relative;
+                width: 100%;
             }
 
             .plus-elements-per-page > label {
-                display: flex;
-                height: 30px;
                 opacity: 1;
+                -webkit-box-align: center;
+                -ms-flex-align: center;
+                -webkit-box-pack: justify;
+                -ms-flex-pack: justify;
+                align-items: center;
+                background-color: #fff;
+                border: 1px solid #d4d4d4;
+                border-radius: 12px;
+                color: #6c6c6c;
+                cursor: pointer;
+                display: -webkit-box;
+                display: -ms-flexbox;
+                display: flex;
+                font-family: Noto Sans Mono,Arial,Helvetica;
+                font-size: 12px;
+                font-weight: 400;
+                gap: 12px;
+                justify-content: space-between;
+                line-height: 16px;
+                min-height: 34px;
+                outline: none;
+                width: calc(100% - 2px);
             }
 
             .plus-elements-per-page > label > span {
-                flex-grow: 1;
-                padding: 10px 0 10px 10px;
+                font-family: Noto Sans Mono,Arial,Helvetica;
                 font-size: 12px;
-                line-height: 11px;
-                color: #555;
+                line-height: 16px;
+                padding-left: 12px;
             }
 
             .plus-elements-per-page > label > select {
-                width: 80px;
+                min-width: 80px;
                 height: 30px;
                 cursor: pointer;
                 border: 0;
-                border-left: 1px solid #eee;
-                color: #555;
+                border-left: 1px solid #d4d4d4;
+                color: #6c6c6c;
+                font-family: Noto Sans Mono,Arial,Helvetica;
+                font-size: 12px;
+                font-weight: 400;
+                padding-left: 12px;
+                margin-right: 12px;
             }
 
-            .plus-hidden {
+            .plus-hidden-left,
+            .plus-hidden-right {
                 visibility: hidden;
             }
 
-            @media (max-width: 1639px) {
-            .plus-hidden {
+            @media (max-width: 1691px) {
+            .plus-hidden-left {
+                display: none;
+                }
+            }
+            
+            @media (max-width: 2015px) {
+            .plus-hidden-right {
                 display: none;
                 }
             }`;
