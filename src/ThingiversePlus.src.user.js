@@ -878,9 +878,12 @@
             availableOptions.push(option);
         });
 
-        // Generate empty filter
-        let emptyFilter = document.createElement('div');
-        emptyFilter.classList.add('plus-elements-per-page', 'plus-hidden');
+        // Generate empty filters
+        let emptyFilterLeft = document.createElement('div');
+        emptyFilterLeft.classList.add('plus-elements-per-page', 'plus-hidden-left');
+
+        let emptyFilterRight = document.createElement('div');
+        emptyFilterRight.classList.add('plus-elements-per-page', 'plus-hidden-right');
 
         // Generate html
         let htmlElementsPerPage = document.createElement('div');
@@ -921,12 +924,12 @@
         const addBarOption = (loadedSearchFilterBar, positionRight) => {
             if (!positionRight) {
                 // Add html
-                loadedSearchFilterBar.prepend(htmlElementsPerPage);
-                loadedSearchFilterBar.append(emptyFilter);
+                loadedSearchFilterBar.prepend(emptyFilterLeft, htmlElementsPerPage);
+                loadedSearchFilterBar.append(emptyFilterRight);
             } else {
                 // Add html
-                loadedSearchFilterBar.prepend(emptyFilter);
-                loadedSearchFilterBar.append(htmlElementsPerPage);
+                loadedSearchFilterBar.prepend(emptyFilterLeft);
+                loadedSearchFilterBar.append(htmlElementsPerPage, emptyFilterRight);
             }
         };
 
