@@ -327,8 +327,9 @@
         checkbox.type = 'checkbox';
         checkbox.id = 'plus-checkbox-' + feature.id;
         checkbox.className = 'plus-settings-checkbox';
+        checkbox.dataset.feature = feature.id; // Set the feature name
         checkbox.onchange = function () {
-            updateConfigStatus(this, feature);
+            updateConfigStatus(this);
         };
 
         // Get previously saved value
@@ -393,8 +394,10 @@
         checkboxElement.className = 'plus-settings-checkbox';
         checkboxElement.checked = !!checkboxSavedStatus;
         checkboxElement.disabled = !visible;
+        checkboxElement.dataset.feature = feature.id; // Set the feature name
+        checkboxElement.dataset.option = option.id; // Set the option name
         checkboxElement.onchange = function () {
-            updateConfigStatus(this, feature, option);
+            updateConfigStatus(this);
         };
         subconfig.appendChild(checkboxElement);
 
@@ -437,8 +440,10 @@
         checkbox.id = 'plus-toggle-' + option.id;
         checkbox.checked = !!toggleSavedStatus;
         checkbox.disabled = !visible;
+        checkbox.dataset.feature = feature.id; // Set the feature name
+        checkbox.dataset.option = option.id; // Set the option name
         checkbox.onchange = function () {
-            updateConfigStatus(this, feature, option);
+            updateConfigStatus(this);
         };
         toggleElement.appendChild(checkbox);
 
@@ -535,29 +540,63 @@
         }
     }
 
-    function updateConfigStatus(targetCheckbox, feature, option) {
-        if (typeof option === 'undefined') {
-            // update config value
+    /**
+     * Updates the configuration status based on the state of the target checkbox.
+     * If the checkbox corresponds to a feature, it updates the feature's configuration.
+     * If the checkbox corresponds to an option within a feature, it updates the option's configuration.
+     *
+     * @param {HTMLElement} targetCheckbox - The checkbox element whose state triggers the update.
+     */
+    function updateConfigStatus(targetCheckbox) {
+        // Extract feature and option names from dataset
+        const featureName = targetCheckbox.dataset.feature;
+        const optionName = targetCheckbox.dataset.option;
+
+        // Find the feature corresponding to the checkbox
+        const feature = features.find(feature => feature.id === featureName);
+
+        // Ensure the feature exists
+        if (!feature) {
+            console.error('Feature not found');
+            return;
+        }
+
+        let enableFunction;
+        let disableFunction;
+
+        // Check if the checkbox corresponds to a feature or an option
+        if (typeof optionName === 'undefined') {
+            // Update config value for the feature
             GM_setValue('settings_' + feature.id, targetCheckbox.checked);
 
-            if (targetCheckbox.checked) {
-                feature.enableFunction();
-            } else {
-                feature.disableFunction();
+            // If the checkbox corresponds to a feature
+            enableFunction = feature.enableFunction;
+            disableFunction = feature.disableFunction;
+
+            // Update visibility of options
+            updateOptionVisibility(targetCheckbox, targetCheckbox.checked);
+        } else {
+            // If the checkbox corresponds to an option within a feature
+            const option = feature.options.find(option => option.id === optionName);
+
+            // Ensure the option exists
+            if (!option) {
+                console.error('Option not found');
+                return;
             }
 
-            updateSiblingsVisibility(targetCheckbox, targetCheckbox.checked);
-        }
-        else {
-            // update config value
+            // Update config value for the option
             GM_setValue('settings_' + feature.id + '_' + option.id, targetCheckbox.checked);
 
-            // if enable/disable functions are defined
-            if (typeof option.enableFunction !== 'undefined' && targetCheckbox.checked) {
-                option.enableFunction();
-            } else if (typeof option.disableFunction !== 'undefined') {
-                option.disableFunction();
-            }
+            enableFunction = option.enableFunction;
+            disableFunction = option.disableFunction;
+        }
+
+        // Call enable/disable functions if they exist
+        if (targetCheckbox.checked && typeof enableFunction === 'function') {
+            enableFunction();
+        } else if (!targetCheckbox.checked && typeof disableFunction === 'function') {
+            disableFunction();
         }
     }
 
