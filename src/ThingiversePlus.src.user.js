@@ -532,12 +532,11 @@
         GM_addStyle(cssToggleSwitch);
     }
 
-    function getConfigStatus(idFeature, idOption) {
-        if (typeof idOption === 'undefined') {
-            return GM_getValue('settings_' + idFeature, false);
-        }
-        else {
-            return GM_getValue('settings_' + idFeature + '_' + idOption, false);
+    function getConfigStatus(featureId, optionId) {
+        if (typeof optionId === 'undefined') {
+            return GM_getValue('settings_' + featureId, false);
+        } else {
+            return GM_getValue('settings_' + featureId + '_' + optionId, false);
         }
     }
 
