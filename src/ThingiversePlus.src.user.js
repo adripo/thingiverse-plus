@@ -505,6 +505,7 @@
                 opacity: 1;
                 justify-content: center;
                 align-items: center;
+                font-family: Noto Sans Mono,Arial,Helvetica;
                 font-size: 0.75rem;
                 color: #555;
                 transition: color .2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
