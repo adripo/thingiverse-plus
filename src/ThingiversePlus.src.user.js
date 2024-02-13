@@ -600,26 +600,39 @@
         }
     }
 
-    //TODO convert to toggle and use el.classList.toggle('hidden');
-    function updateSiblingsVisibility(targetCheckbox, visible) {
-        for (let sibling of targetCheckbox.parentNode.parentNode.children) {
-            if (sibling !== targetCheckbox.parentNode) {
-                if (visible) {
-                    updateCheckboxEnablement(sibling, true);
-                    sibling.classList.remove('hidden');
-                } else {
-                    sibling.classList.add('hidden');
-                    updateCheckboxEnablement(sibling, false);
-                }
-            }
+    /**
+     * Updates the visibility and enables/disables the option checkboxes based on the state of the feature checkbox.
+     * @param {HTMLElement} featureCheckbox - The feature checkbox whose state determines the visibility and enablement of option checkboxes.
+     */
+    function updateOptionVisibility(featureCheckbox) {
+        // Find the container of the feature checkbox
+        const featureContainer = featureCheckbox.closest('.plus-settings-feature-container');
+
+        // Check if the feature container exists
+        if (!featureContainer) {
+            console.error('Feature container not found');
+            return;
         }
+
+        // Select all option elements within the feature container
+        const optionElements = featureContainer.querySelectorAll('.plus-subsettings-element');
+
+        // Iterate over each option element
+        optionElements.forEach(option => {
+            // Find the checkbox element within the option element
+            const checkbox = option.querySelector('input[type="checkbox"]');
+
+            // Check if a checkbox element exists within the option element
+            if (checkbox) {
+                // Toggle the 'hidden' class of the option element based on the state of the feature checkbox
+                option.classList.toggle('hidden', !featureCheckbox.checked);
+
+                // Disable the checkbox based on the state of the feature checkbox
+                checkbox.disabled = !featureCheckbox.checked;
+            }
+        });
     }
 
-    function updateCheckboxEnablement(targetDiv, enable) {
-        // Enable checkboxes
-        let checkbox = targetDiv.querySelector('input[type=checkbox]');
-        checkbox.disabled = !enable;
-    }
     /* Graphical Improvements */
 
     function enableGraphicalImprovements() {
