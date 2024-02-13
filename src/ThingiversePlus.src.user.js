@@ -187,7 +187,7 @@
 
             .plus-settings-container > div {
                 background-color: #f5f5f5;
-                padding: 10px;
+                padding: 8px;
                 border-radius: 3px;
             }
 
@@ -197,8 +197,8 @@
 
             .plus-settings-checkbox {
                 vertical-align: middle;
-                width: 32px;
-                height: 32px;
+                width: 30px;
+                height: 30px;
                 margin: 0;
                 cursor: pointer;
             }
@@ -208,15 +208,15 @@
                 vertical-align: middle;
                 color: #555;
                 opacity: 1;
-                font-size: 16px;
                 margin: 0 10px 0 10px;
-                line-height: 32px;
                 cursor: pointer;
-                font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
+                font-family: Noto Sans Mono,Arial,Helvetica;
+                font-size: 16px;
+                line-height: 30px;
             }
 
             .plus-subsettings-element {
-                --height: 32px;
+                --height: 30px;
 
                 transition: max-height 0.3s, visibility 0.3s, opacity 0.3s linear;
                 max-height: var(--height);
@@ -240,7 +240,7 @@
             }
 
             .plus-settings-pipe {
-                --width: 32px;
+                --width: 30px;
                 --top-gap: 2px;
 
                 display: inline-block;
