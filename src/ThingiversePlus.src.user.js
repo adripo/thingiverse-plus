@@ -590,7 +590,7 @@
             disableFunction = feature.disableFunction;
 
             // Update visibility of options
-            updateOptionVisibility(targetCheckbox, targetCheckbox.checked);
+            updateOptionsVisibility(targetCheckbox, targetCheckbox.checked);
         } else {
             // If the checkbox corresponds to an option within a feature
             const option = feature.options.find(option => option.id === optionName);
@@ -620,7 +620,7 @@
      * Updates the visibility and enables/disables the option checkboxes based on the state of the feature checkbox.
      * @param {HTMLElement} featureCheckbox - The feature checkbox whose state determines the visibility and enablement of option checkboxes.
      */
-    function updateOptionVisibility(featureCheckbox) {
+    function updateOptionsVisibility(featureCheckbox) {
         // Find the container of the feature checkbox
         const featureContainer = featureCheckbox.closest('.plus-settings-feature-container');
 
