@@ -466,7 +466,12 @@
         return subconfig;
     }
 
+    /**
+     * Creates and adds CSS styles for a toggle switch.
+     * The toggle switch consists of a slider and labels for 'On' and 'Off' states.
+     */
     function createToggleSwitchCSS() {
+        // CSS styles for the toggle switch
         const cssToggleSwitch =
             `/* Toggle Style */
 
@@ -529,6 +534,7 @@
                 color: white;
             }`;
 
+        // Add the CSS styles to the page
         GM_addStyle(cssToggleSwitch);
     }
 
