@@ -532,13 +532,23 @@
         GM_addStyle(cssToggleSwitch);
     }
 
+    /**
+     * Retrieves the status of a feature or option from the configuration.
+     * @param {string} featureId - The ID of the feature.
+     * @param {string} [optionId] - The ID of the option (optional).
+     * @returns {boolean} - The status of the feature or option.
+     */
     function getConfigStatus(featureId, optionId) {
+        // Check if optionId is provided
         if (typeof optionId === 'undefined') {
+            // Retrieve status of the feature from the configuration
             return GM_getValue('settings_' + featureId, false);
         } else {
+            // Retrieve status of the option from the configuration
             return GM_getValue('settings_' + featureId + '_' + optionId, false);
         }
     }
+
 
     /**
      * Updates the configuration status based on the state of the target checkbox.
