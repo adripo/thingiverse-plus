@@ -370,8 +370,31 @@
         return featureSubconfig;
     }
 
-    function createSubconfigCheckbox(feature, option, visible) {
-        // Settings element
+    /**
+     * Creates a subconfiguration checkbox element for a feature option.
+     * @param {string} featureId - The ID of the feature containing the option.
+     * @param {string} optionId - The ID of the option.
+     * @returns {HTMLElement} - The created subconfiguration checkbox element.
+     */
+    function createSubconfigCheckbox(featureId, optionId) {
+        // Find the feature corresponding to the featureId
+        const feature = features.find(feature => feature.id === featureId);
+        if (!feature) {
+            console.error('Feature not found:', featureId);
+            return null;
+        }
+
+        // Find the option within the feature
+        const option = feature.options.find(option => option.id === optionId);
+        if (!option) {
+            console.error('Option not found:', optionId);
+            return null;
+        }
+
+        // Get the feature status to set option visibility
+        const visible = getConfigStatus(feature.id);
+
+        // Create the settings element
         let subconfig = document.createElement('div');
         subconfig.id = 'plus-settings-' + option.id;
         subconfig.className = 'plus-subsettings-element';
@@ -379,15 +402,15 @@
             subconfig.classList.add('hidden');
         }
 
-        // Pipe element
+        // Create the pipe element
         let pipeElement = document.createElement('div');
         pipeElement.className = 'plus-settings-pipe';
         subconfig.appendChild(pipeElement);
 
-        // Get previously saved value
+        // Get the previously saved value
         const checkboxSavedStatus = getConfigStatus(feature.id, option.id);
 
-        // Checkbox
+        // Create the checkbox element
         let checkboxElement = document.createElement('input');
         checkboxElement.type = 'checkbox';
         checkboxElement.id = 'plus-checkbox-' + feature.id + '-' + option.id;
@@ -401,6 +424,7 @@
         };
         subconfig.appendChild(checkboxElement);
 
+        // Create the label element
         let labelElement = document.createElement('label');
         labelElement.htmlFor = checkboxElement.id;
         labelElement.innerHTML = option.description;
