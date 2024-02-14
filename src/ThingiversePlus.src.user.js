@@ -347,7 +347,7 @@
 
         if (feature.options !== undefined) {
             feature.options.forEach(option => {
-                let featureSubconfig = createFeatureSubconfig(feature, option, checkbox.checked)
+                let featureSubconfig = createFeatureSubconfig(feature.id, option.id)
                 featureContainer.appendChild(featureSubconfig);
             });
         }
