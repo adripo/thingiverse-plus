@@ -433,8 +433,32 @@
         return subconfig;
     }
 
-    function createSubconfigToggle(feature, option, visible) {
-        // Settings element
+
+    /**
+     * Creates a subconfiguration toggle element for a feature option.
+     * @param {string} featureId - The ID of the feature containing the option.
+     * @param {string} optionId - The ID of the option.
+     * @returns {HTMLElement} - The created subconfiguration toggle element.
+     */
+    function createSubconfigToggle(featureId, optionId) {
+        // Find the feature corresponding to the featureId
+        const feature = features.find(feature => feature.id === featureId);
+        if (!feature) {
+            console.error('Feature not found:', featureId);
+            return null;
+        }
+
+        // Find the option within the feature
+        const option = feature.options.find(option => option.id === optionId);
+        if (!option) {
+            console.error('Option not found:', optionId);
+            return null;
+        }
+
+        // Get the feature status to set option visibility
+        const visible = getConfigStatus(feature.id);
+
+        // Create the settings element
         let subconfig = document.createElement('div');
         subconfig.id = 'plus-settings-' + option.id;
         subconfig.className = 'plus-subsettings-element';
@@ -442,20 +466,20 @@
             subconfig.classList.add('hidden');
         }
 
-        // Pipe element
+        // Create the pipe element
         let pipeElement = document.createElement('div');
         pipeElement.className = 'plus-settings-pipe';
         subconfig.appendChild(pipeElement);
 
-        // Description span
+        // Create the description span
         let descriptionElement = document.createElement('span');
         descriptionElement.innerHTML = option.description + ':';
         subconfig.appendChild(descriptionElement);
 
-        // Get previously saved value
+        // Get the previously saved value
         const toggleSavedStatus = getConfigStatus(feature.id, option.id);
 
-        // Toggle switch element
+        // Create the toggle switch element
         let toggleElement = document.createElement('label');
         toggleElement.className = 'plus-toggle';
 
