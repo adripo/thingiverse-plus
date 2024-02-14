@@ -355,16 +355,41 @@
         return featureContainer;
     }
 
-    function createFeatureSubconfig(feature, option, visible) {
+    /**
+     * Creates a subconfiguration element for a feature option based on its type.
+     * @param {string} featureId - The ID of the feature containing the option.
+     * @param {string} optionId - The ID of the option.
+     * @returns {HTMLElement} - The created subconfiguration element.
+     */
+    function createFeatureSubconfig(featureId, optionId) {
+        // Find the feature corresponding to the featureId
+        const feature = features.find(feature => feature.id === featureId);
+        if (!feature) {
+            console.error('Feature not found:', featureId);
+            return null;
+        }
+
+        // Find the option within the feature
+        const option = feature.options.find(option => option.id === optionId);
+        if (!option) {
+            console.error('Option not found:', optionId);
+            return null;
+        }
+
         let featureSubconfig;
 
         switch (option.type) {
             case 'checkbox':
-                featureSubconfig = createSubconfigCheckbox(feature, option, visible);
+                featureSubconfig = createSubconfigCheckbox(feature.id, option.id);
                 break;
             case 'toggle':
-                featureSubconfig = createSubconfigToggle(feature, option, visible);
+                featureSubconfig = createSubconfigToggle(feature.id, option.id);
                 break;
+        }
+
+        if (!featureSubconfig) {
+            console.error('Failed to create subconfiguration for:', optionId);
+            return null;
         }
 
         return featureSubconfig;
