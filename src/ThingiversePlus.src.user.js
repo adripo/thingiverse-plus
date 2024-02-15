@@ -838,6 +838,10 @@
             cssElementsPerPageElement.remove();
             cssElementsPerPageElement = undefined;
         }
+
+        disableGraphicalImprovements();
+
+        disableParamPerPage();
     }
 
     function enableElementsPerPage() {
@@ -845,6 +849,7 @@
         if (pathname === '/' || pathname === '/search') {
             const positionRightStatus = getConfigStatus(idElementsPerPage, idElementsPerPagePositionRight);
 
+            enableGraphicalImprovements();
             enablePerPageSelect(positionRightStatus);
         }
     }
