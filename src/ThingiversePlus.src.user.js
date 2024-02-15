@@ -1004,14 +1004,17 @@
             }
 
             @media (max-width: 1691px) {
-            .plus-hidden-left {
-                display: none;
+                .plus-hidden-left {
+                    display: none;
+                }
+                .plus-hidden-right {
+                    display: none;
                 }
             }
-            
+
             @media (max-width: 2015px) {
-            .plus-hidden-right {
-                display: none;
+                .plus-hidden-d-none {
+                    display: none;
                 }
             }`;
 
@@ -1071,10 +1074,16 @@
         // Callback function to execute when mutations are observed
         const addBarOption = (loadedSearchFilterBar, positionRight) => {
             if (!positionRight) {
+                // Needs to be always hidden for smaller resolutions
+                emptyFilterLeft.classList.add('plus-hidden-d-none');
+
                 // Add html
                 loadedSearchFilterBar.prepend(emptyFilterLeft, htmlElementsPerPage);
                 loadedSearchFilterBar.append(emptyFilterRight);
             } else {
+                // Needs to be always hidden for smaller resolutions
+                emptyFilterRight.classList.add('plus-hidden-d-none');
+
                 // Add html
                 loadedSearchFilterBar.prepend(emptyFilterLeft);
                 loadedSearchFilterBar.append(htmlElementsPerPage, emptyFilterRight);
