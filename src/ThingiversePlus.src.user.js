@@ -628,7 +628,6 @@
         }
     }
 
-
     /**
      * Updates the configuration status based on the state of the target checkbox.
      * If the checkbox corresponds to a feature, it updates the feature's configuration.
@@ -721,6 +720,7 @@
             }
         });
     }
+
 
     /* Graphical Improvements */
 
