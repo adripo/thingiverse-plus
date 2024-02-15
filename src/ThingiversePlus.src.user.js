@@ -856,7 +856,7 @@
         const pathname = window.location.pathname;
         if (pathname.startsWith('/thing:')) {
             // Set 6 elements per page in 'More' section
-            changeElementsPerPage(6);
+            setParamPerPage(6);
         }
     }
 
@@ -909,12 +909,21 @@
 
     /* Change Elements Per Page */
 
-    function changeElementsPerPage(elementsPerPage) {
+    function setParamPerPage(elementsPerPage) {
+        // if already modified, reset
+        if (URLSearchParams.prototype._append) {
+            disableParamPerPage();
+        }
+
         URLSearchParams.prototype._append = URLSearchParams.prototype.append;
         URLSearchParams.prototype.append = function append(k, v) {
             if (k === 'per_page') v = elementsPerPage;
             return this._append(k, v);
         }
+    }
+
+    function disableParamPerPage() {
+        URLSearchParams.prototype.append = URLSearchParams.prototype._append;
     }
 
 
@@ -926,7 +935,7 @@
         // Get previously saved value for elements_per_page
         const elementsPerPage = GM_getValue('elements_per_page', availablePerPageValues[0]);
         // Change value of elements per page to load
-        changeElementsPerPage(elementsPerPage);
+        setParamPerPage(elementsPerPage);
 
         // Generate CSS
         const cssElementsPerPage =
@@ -1035,8 +1044,8 @@
             const newPerPageValue = parseInt(this.value);
             if (availablePerPageValues.includes(newPerPageValue)) {
                 GM_setValue('elements_per_page', newPerPageValue);
+                setParamPerPage(newPerPageValue);
             }
-            window.location.reload();
         };
 
         let label = document.createElement('label');
