@@ -638,15 +638,15 @@
      */
     function updateConfigStatus(targetCheckbox) {
         // Extract feature and option names from dataset
-        const featureName = targetCheckbox.dataset.feature;
-        const optionName = targetCheckbox.dataset.option;
+        const featureId = targetCheckbox.dataset.feature;
+        const optionId = targetCheckbox.dataset.option;
 
         // Find the feature corresponding to the checkbox
-        const feature = features.find(feature => feature.id === featureName);
+        const feature = features.find(feature => feature.id === featureId);
 
         // Ensure the feature exists
         if (!feature) {
-            console.error('Feature not found');
+            console.error('Feature not found:', featureId);
             return;
         }
 
@@ -654,7 +654,7 @@
         let disableFunction;
 
         // Check if the checkbox corresponds to a feature or an option
-        if (typeof optionName === 'undefined') {
+        if (typeof optionId === 'undefined') {
             // Update config value for the feature
             GM_setValue('settings_' + feature.id, targetCheckbox.checked);
 
@@ -666,11 +666,11 @@
             updateOptionsVisibility(targetCheckbox, targetCheckbox.checked);
         } else {
             // If the checkbox corresponds to an option within a feature
-            const option = feature.options.find(option => option.id === optionName);
+            const option = feature.options.find(option => option.id === optionId);
 
             // Ensure the option exists
             if (!option) {
-                console.error('Option not found');
+                console.error('Option not found:', optionId);
                 return;
             }
 
