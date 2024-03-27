@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Thingiverse Plus
 // @namespace    https://thingiverse.com/
-// @version      2.0.3
+// @version      3.0.0
 // @description  Thingiverse with extra features
 // @author       adripo
 // @homepage     https://github.com/adripo/thingiverse-plus
@@ -10,7 +10,7 @@
 // @downloadURL  https://raw.githubusercontent.com/adripo/thingiverse-plus/main/ThingiversePlus.user.js
 // @supportURL   https://github.com/adripo/thingiverse-plus/issues
 // @match        https://www.thingiverse.com/*
-// @require      https://cdn.jsdelivr.net/gh/CoeJoder/waitForKeyElements.js@v1.2/waitForKeyElements.js
+// @require      https://cdn.jsdelivr.net/gh/CoeJoder/GM_wrench@v1.3/dist/GM_wrench.min.js
 // @require      https://raw.githubusercontent.com/eligrey/FileSaver.js/master/src/FileSaver.js
 // @require      https://raw.githubusercontent.com/Stuk/jszip/master/dist/jszip.min.js
 // @grant        GM_addStyle
@@ -19,32 +19,39 @@
 // ==/UserScript==
 
 //TODO docs for functions
-//TODO check emenets that need to waitForKeyElements before executing action
+//TODO check elements that need to waitForKeyElements before executing action
 //todo change plus-settings-checkbox with config
 //todo convert styles; example: var.style.cssText = 'display: none;'; into createNewOption.style.display = 'none;';
+//TODO change foreach with for.. of
 
 (function () {
     'use strict';
 
     // Global variables
+    let cssGraphicalImprovementsElement;
     let cssHideBannersElement;
     let cssHideAdsElement;
     let cssElementsPerPageElement;
     let advancedCollectionObserver;
 
-    //TODO remove following const and use them from features var.
-    const elNameElementsPerPagePosition = 'elements-per-page-position';
-    const elNameDownloadAllFilesImages = 'download-all-files-images';
+    // Feature ids
+    const idDownloadAllFiles = 'download-all-files';
+    const idDownloadAllFilesImages = 'images';
+    const idAdvancedCollections = 'advanced-collections';
+    const idElementsPerPage = 'elements-per-page';
+    const idElementsPerPagePositionRight = 'position-right';
+    const idHideBanners = 'hide-banners';
+    const idHideAds = 'hide-ads';
 
     const features = [
         {
-            name: 'download-all-files',
+            id: idDownloadAllFiles,
             description: 'Download All Files As Zip',
             enableFunction: enableDownloadAllFilesBindButton,
             disableFunction: disableDownloadAllFilesBindButton,
             options: [
                 {
-                    name: 'download-all-files-images',
+                    id: idDownloadAllFilesImages,
                     description: 'include images',
                     type: 'checkbox',
                     enableFunction: toggleDownloadAllFilesImages,
@@ -53,19 +60,19 @@
             ]
         },
         {
-            name: 'advanced-collections',
+            id: idAdvancedCollections,
             description: 'Advanced Collections',
             enableFunction: enableAdvancedCollections,
             disableFunction: disableAdvancedCollections
         },
         {
-            name: 'elements-per-page',
+            id: idElementsPerPage,
             description: 'Elements Per Page Selector',
             enableFunction: enableElementsPerPage,
             disableFunction: disableElementsPerPage,
             options: [
                 {
-                    name: 'elements-per-page-position',
+                    id: idElementsPerPagePositionRight,
                     description: 'Position',
                     type: 'toggle',
                     left: 'Left',
@@ -76,13 +83,13 @@
             ]
         },
         {
-            name: 'hide-banners',
+            id: idHideBanners,
             description: 'Hide Banners',
             enableFunction: enableHideBanners,
             disableFunction: disableHideBanners
         },
         {
-            name: 'hide-ads',
+            id: idHideAds,
             description: 'Hide Ads',
             enableFunction: enableHideAds,
             disableFunction: disableHideAds
@@ -107,7 +114,7 @@
     }
 
     function setupFeature(feature) {
-        const featureStatus = GM_getValue('settings_' + feature.name, false);
+        const featureStatus = getConfigStatus(feature.id);
 
         if (featureStatus) {
             feature.enableFunction();
@@ -180,7 +187,7 @@
 
             .plus-settings-container > div {
                 background-color: #f5f5f5;
-                padding: 10px;
+                padding: 8px;
                 border-radius: 3px;
             }
 
@@ -190,8 +197,8 @@
 
             .plus-settings-checkbox {
                 vertical-align: middle;
-                width: 32px;
-                height: 32px;
+                width: 30px;
+                height: 30px;
                 margin: 0;
                 cursor: pointer;
             }
@@ -201,15 +208,15 @@
                 vertical-align: middle;
                 color: #555;
                 opacity: 1;
-                font-size: 16px;
                 margin: 0 10px 0 10px;
-                line-height: 32px;
                 cursor: pointer;
-                font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol!important;
+                font-family: Noto Sans Mono,Arial,Helvetica;
+                font-size: 16px;
+                line-height: 30px;
             }
 
             .plus-subsettings-element {
-                --height: 32px;
+                --height: 30px;
 
                 transition: max-height 0.3s, visibility 0.3s, opacity 0.3s linear;
                 max-height: var(--height);
@@ -233,7 +240,7 @@
             }
 
             .plus-settings-pipe {
-                --width: 32px;
+                --width: 30px;
                 --top-gap: 2px;
 
                 display: inline-block;
@@ -318,14 +325,15 @@
 
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.id = 'plus-checkbox-' + feature.name;
+        checkbox.id = 'plus-checkbox-' + feature.id;
         checkbox.className = 'plus-settings-checkbox';
+        checkbox.dataset.feature = feature.id; // Set the feature name
         checkbox.onchange = function () {
-            updateConfigStatus(this, feature);
+            updateConfigStatus(this);
         };
 
         // Get previously saved value
-        const checkboxSavedStatus = GM_getValue('settings_' + feature.name, false);
+        const checkboxSavedStatus = getConfigStatus(feature.id);
         checkbox.checked = !!checkboxSavedStatus;
 
         let label = document.createElement('label');
@@ -339,7 +347,7 @@
 
         if (feature.options !== undefined) {
             feature.options.forEach(option => {
-                let featureSubconfig = createFeatureSubconfig(option, checkbox.checked)
+                let featureSubconfig = createFeatureSubconfig(feature.id, option.id)
                 featureContainer.appendChild(featureSubconfig);
             });
         }
@@ -347,50 +355,101 @@
         return featureContainer;
     }
 
-    function createFeatureSubconfig(option, visible) {
+    /**
+     * Creates a subconfiguration element for a feature option based on its type.
+     * @param {string} featureId - The ID of the feature containing the option.
+     * @param {string} optionId - The ID of the option.
+     * @returns {HTMLElement} - The created subconfiguration element.
+     */
+    function createFeatureSubconfig(featureId, optionId) {
+        // Find the feature corresponding to the featureId
+        const feature = features.find(feature => feature.id === featureId);
+        if (!feature) {
+            console.error('Feature not found:', featureId);
+            return null;
+        }
+
+        // Find the option within the feature
+        const option = feature.options.find(option => option.id === optionId);
+        if (!option) {
+            console.error('Option not found:', optionId);
+            return null;
+        }
+
         let featureSubconfig;
 
         switch (option.type) {
             case 'checkbox':
-                featureSubconfig = createSubconfigCheckbox(option, visible);
+                featureSubconfig = createSubconfigCheckbox(feature.id, option.id);
                 break;
             case 'toggle':
-                featureSubconfig = createSubconfigToggle(option, visible);
+                featureSubconfig = createSubconfigToggle(feature.id, option.id);
                 break;
+        }
+
+        if (!featureSubconfig) {
+            console.error('Failed to create subconfiguration for:', optionId);
+            return null;
         }
 
         return featureSubconfig;
     }
 
-    function createSubconfigCheckbox(option, visible) {
-        // Settings element
+    /**
+     * Creates a subconfiguration checkbox element for a feature option.
+     * @param {string} featureId - The ID of the feature containing the option.
+     * @param {string} optionId - The ID of the option.
+     * @returns {HTMLElement} - The created subconfiguration checkbox element.
+     */
+    function createSubconfigCheckbox(featureId, optionId) {
+        // Find the feature corresponding to the featureId
+        const feature = features.find(feature => feature.id === featureId);
+        if (!feature) {
+            console.error('Feature not found:', featureId);
+            return null;
+        }
+
+        // Find the option within the feature
+        const option = feature.options.find(option => option.id === optionId);
+        if (!option) {
+            console.error('Option not found:', optionId);
+            return null;
+        }
+
+        // Get the feature status to set option visibility
+        const visible = getConfigStatus(feature.id);
+
+        // Create the settings element
         let subconfig = document.createElement('div');
-        subconfig.id = 'plus-settings-' + option.name;
+        subconfig.id = 'plus-settings-' + option.id;
         subconfig.className = 'plus-subsettings-element';
         if (!visible) {
             subconfig.classList.add('hidden');
         }
 
-        // Pipe element
+        // Create the pipe element
         let pipeElement = document.createElement('div');
         pipeElement.className = 'plus-settings-pipe';
         subconfig.appendChild(pipeElement);
 
-        // Get previously saved value
-        const checkboxSavedStatus = GM_getValue('subsettings_' + name, false);
+        // Get the previously saved value
+        const checkboxSavedStatus = getConfigStatus(feature.id, option.id);
 
-        // Checkbox
+        // Create the checkbox element
         let checkboxElement = document.createElement('input');
         checkboxElement.type = 'checkbox';
-        checkboxElement.id = 'plus-checkbox-' + option.name;
+        checkboxElement.id = 'plus-checkbox-' + feature.id + '-' + option.id;
         checkboxElement.className = 'plus-settings-checkbox';
         checkboxElement.checked = !!checkboxSavedStatus;
         checkboxElement.disabled = !visible;
+        checkboxElement.dataset.feature = feature.id; // Set the feature name
+        checkboxElement.dataset.option = option.id; // Set the option name
         checkboxElement.onchange = function () {
-            updateSubconfigStatus(this, option);
+            updateConfigStatus(this);
         };
         subconfig.appendChild(checkboxElement);
 
+        // Create the label element
         let labelElement = document.createElement('label');
         labelElement.htmlFor = checkboxElement.id;
         labelElement.innerHTML = option.description;
@@ -399,39 +458,65 @@
         return subconfig;
     }
 
-    function createSubconfigToggle(option, visible) {
-        // Settings element
+
+    /**
+     * Creates a subconfiguration toggle element for a feature option.
+     * @param {string} featureId - The ID of the feature containing the option.
+     * @param {string} optionId - The ID of the option.
+     * @returns {HTMLElement} - The created subconfiguration toggle element.
+     */
+    function createSubconfigToggle(featureId, optionId) {
+        // Find the feature corresponding to the featureId
+        const feature = features.find(feature => feature.id === featureId);
+        if (!feature) {
+            console.error('Feature not found:', featureId);
+            return null;
+        }
+
+        // Find the option within the feature
+        const option = feature.options.find(option => option.id === optionId);
+        if (!option) {
+            console.error('Option not found:', optionId);
+            return null;
+        }
+
+        // Get the feature status to set option visibility
+        const visible = getConfigStatus(feature.id);
+
+        // Create the settings element
         let subconfig = document.createElement('div');
-        subconfig.id = 'plus-settings-' + option.name;
+        subconfig.id = 'plus-settings-' + option.id;
         subconfig.className = 'plus-subsettings-element';
         if (!visible) {
             subconfig.classList.add('hidden');
         }
 
-        // Pipe element
+        // Create the pipe element
         let pipeElement = document.createElement('div');
         pipeElement.className = 'plus-settings-pipe';
         subconfig.appendChild(pipeElement);
 
-        // Description span
+        // Create the description span
         let descriptionElement = document.createElement('span');
         descriptionElement.innerHTML = option.description + ':';
         subconfig.appendChild(descriptionElement);
 
-        // Get previously saved value
-        const toggleSavedStatus = GM_getValue('subsettings_' + option.name, false);
+        // Get the previously saved value
+        const toggleSavedStatus = getConfigStatus(feature.id, option.id);
 
-        // Toggle switch element
+        // Create the toggle switch element
         let toggleElement = document.createElement('label');
         toggleElement.className = 'plus-toggle';
 
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.id = 'plus-toggle-' + option.name;
+        checkbox.id = 'plus-toggle-' + option.id;
         checkbox.checked = !!toggleSavedStatus;
         checkbox.disabled = !visible;
+        checkbox.dataset.feature = feature.id; // Set the feature name
+        checkbox.dataset.option = option.id; // Set the option name
         checkbox.onchange = function () {
-            updateSubconfigStatus(this, option);
+            updateConfigStatus(this);
         };
         toggleElement.appendChild(checkbox);
 
@@ -454,10 +539,15 @@
         return subconfig;
     }
 
+    /**
+     * Creates and adds CSS styles for a toggle switch.
+     * The toggle switch consists of a slider and labels for 'On' and 'Off' states.
+     */
     function createToggleSwitchCSS() {
+        // CSS styles for the toggle switch
         const cssToggleSwitch =
             `/* Toggle Style */
-            
+
             .plus-toggle {
                 --width: 120px;
                 --height: calc(var(--width) / 6);
@@ -493,6 +583,7 @@
                 opacity: 1;
                 justify-content: center;
                 align-items: center;
+                font-family: Noto Sans Mono,Arial,Helvetica;
                 font-size: 0.75rem;
                 color: #555;
                 transition: color .2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -516,52 +607,208 @@
                 color: white;
             }`;
 
+        // Add the CSS styles to the page
         GM_addStyle(cssToggleSwitch);
     }
 
-    function updateConfigStatus(targetCheckbox, feature) {
-        // update config value
-        GM_setValue('settings_' + feature.name, targetCheckbox.checked);
-
-        if (targetCheckbox.checked) {
-            feature.enableFunction();
+    /**
+     * Retrieves the status of a feature or option from the configuration.
+     * @param {string} featureId - The ID of the feature.
+     * @param {string} [optionId] - The ID of the option (optional).
+     * @returns {boolean} - The status of the feature or option.
+     */
+    function getConfigStatus(featureId, optionId) {
+        // Check if optionId is provided
+        if (typeof optionId === 'undefined') {
+            // Retrieve status of the feature from the configuration
+            return GM_getValue('settings_' + featureId, false);
         } else {
-            feature.disableFunction();
+            // Retrieve status of the option from the configuration
+            return GM_getValue('settings_' + featureId + '_' + optionId, false);
         }
-
-        updateSiblingsVisibility(targetCheckbox, targetCheckbox.checked);
     }
 
-    //TODO convert to toggle and use el.classList.toggle('hidden');
-    function updateSiblingsVisibility(targetCheckbox, visible) {
-        for (let sibling of targetCheckbox.parentNode.parentNode.children) {
-            if (sibling !== targetCheckbox.parentNode) {
-                if (visible) {
-                    updateCheckboxEnablement(sibling, true);
-                    sibling.classList.remove('hidden');
-                } else {
-                    sibling.classList.add('hidden');
-                    updateCheckboxEnablement(sibling, false);
-                }
+    /**
+     * Updates the configuration status based on the state of the target checkbox.
+     * If the checkbox corresponds to a feature, it updates the feature's configuration.
+     * If the checkbox corresponds to an option within a feature, it updates the option's configuration.
+     *
+     * @param {HTMLElement} targetCheckbox - The checkbox element whose state triggers the update.
+     */
+    function updateConfigStatus(targetCheckbox) {
+        // Extract feature and option names from dataset
+        const featureId = targetCheckbox.dataset.feature;
+        const optionId = targetCheckbox.dataset.option;
+
+        // Find the feature corresponding to the checkbox
+        const feature = features.find(feature => feature.id === featureId);
+
+        // Ensure the feature exists
+        if (!feature) {
+            console.error('Feature not found:', featureId);
+            return;
+        }
+
+        let enableFunction;
+        let disableFunction;
+
+        // Check if the checkbox corresponds to a feature or an option
+        if (typeof optionId === 'undefined') {
+            // Update config value for the feature
+            GM_setValue('settings_' + feature.id, targetCheckbox.checked);
+
+            // If the checkbox corresponds to a feature
+            enableFunction = feature.enableFunction;
+            disableFunction = feature.disableFunction;
+
+            // Update visibility of options
+            updateOptionsVisibility(targetCheckbox, targetCheckbox.checked);
+        } else {
+            // If the checkbox corresponds to an option within a feature
+            const option = feature.options.find(option => option.id === optionId);
+
+            // Ensure the option exists
+            if (!option) {
+                console.error('Option not found:', optionId);
+                return;
             }
+
+            // Update config value for the option
+            GM_setValue('settings_' + feature.id + '_' + option.id, targetCheckbox.checked);
+
+            enableFunction = option.enableFunction;
+            disableFunction = option.disableFunction;
+        }
+
+        // Call enable/disable functions if they exist
+        if (targetCheckbox.checked && typeof enableFunction === 'function') {
+            enableFunction();
+        } else if (!targetCheckbox.checked && typeof disableFunction === 'function') {
+            disableFunction();
         }
     }
 
-    function updateCheckboxEnablement(targetDiv, enable) {
-        // Enable checkboxes
-        let checkbox = targetDiv.querySelector('input[type=checkbox]');
-        checkbox.disabled = !enable;
+    /**
+     * Updates the visibility and enables/disables the option checkboxes based on the state of the feature checkbox.
+     * @param {HTMLElement} featureCheckbox - The feature checkbox whose state determines the visibility and enablement of option checkboxes.
+     */
+    function updateOptionsVisibility(featureCheckbox) {
+        // Find the container of the feature checkbox
+        const featureContainer = featureCheckbox.closest('.plus-settings-feature-container');
+
+        // Check if the feature container exists
+        if (!featureContainer) {
+            console.error('Feature container not found');
+            return;
+        }
+
+        // Select all option elements within the feature container
+        const optionElements = featureContainer.querySelectorAll('.plus-subsettings-element');
+
+        // Iterate over each option element
+        optionElements.forEach(option => {
+            // Find the checkbox element within the option element
+            const checkbox = option.querySelector('input[type="checkbox"]');
+
+            // Check if a checkbox element exists within the option element
+            if (checkbox) {
+                // Toggle the 'hidden' class of the option element based on the state of the feature checkbox
+                option.classList.toggle('hidden', !featureCheckbox.checked);
+
+                // Disable the checkbox based on the state of the feature checkbox
+                checkbox.disabled = !featureCheckbox.checked;
+            }
+        });
     }
 
-    function updateSubconfigStatus(targetCheckbox, option) {
-        // update config value
-        GM_setValue('subsettings_' + option.name, targetCheckbox.checked);
 
-        // if enable/disable functions are defined
-        if (typeof option.enableFunction !== 'undefined' && targetCheckbox.checked) {
-            option.enableFunction();
-        } else if (typeof option.disableFunction !== 'undefined') {
-            option.disableFunction();
+    /* Graphical Improvements */
+
+    function enableGraphicalImprovements() {
+        if (!cssGraphicalImprovementsElement) {
+            const cssGraphicalImprovements =
+                `/* Graphical Improvements Style */
+    
+                div[class^='HomePage__homePage--'] {
+                    transition: all 0.3s ease;
+                }
+                
+                div[class^='PageHeader__headerPlaceholder--'],
+                div[class^='PageHeader__headerWrapper'] {
+                    min-width: 348px;
+                }
+                
+                @media (max-width: 620px) {
+                    div[class^='ItemCardGrid__itemCardGrid--'] {
+                        grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+                    }
+                }
+    
+                @media (min-width: 1025px) and (max-width: 1043px) {
+                    div[class^='PageHeader__headerPlaceholder--'],
+                    div[class^='PageHeader__headerWrapper--'] {
+                        height: 85px;
+                    }
+                    
+                    div[class^='PageHeader__headerPlaceholder--'][class*='PageHeader__siteNotification--'],
+                    div[class^='PageHeader__headerWrapper--'][class*='PageHeader__siteNotification--'] {
+                        height: 125px;
+                    }
+    
+                    div[class^='PageHeader__header--'] {
+                        -ms-flex-wrap:wrap;
+                        flex-wrap: wrap;
+                        gap: normal;
+                        padding: 0 5px 5px;
+                    }
+                
+                    div[class^='PageHeader__header--'] div[class^='PageHeader__navBar--'] {
+                        -webkit-box-ordinal-group: 3;
+                        -ms-flex-order: 2;
+                        order: 2;
+                    }
+                
+                    div[class^='PageHeader__header--'] div[class*='PageHeader__searchBar--'] {
+                        -webkit-box-ordinal-group: 4;
+                        -ms-flex-order: 3;
+                        order: 3;
+                    }
+                    
+                    div[class*='PageHeader__searchBar--'] {
+                        max-width: none;
+                    }
+                }
+                
+                div[class^='SearchFilterBar__searchFilterBar--'] {
+                    grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+                    display: grid;
+                    row-gap: 18px;
+                    column-gap: 24px;
+                }
+                
+                div[class^='SearchFilterBar__searchFilterBar--'] > * {
+                    width: 100% !important;
+                }
+                
+                div[class^='SearchFilterBar__searchFilterBar--'] > :last-child:nth-child(3n-1),
+                div[class^='SearchFilterBar__searchFilterBar--'] > :nth-last-child(2):nth-child(3n+1) {
+                    grid-column-end: auto;
+                }
+                
+                @media (max-width: 720px) {
+                    .SearchFilterBar__searchFilterBar--RIie5 {
+                        column-gap: 24px;
+                    }
+                }`;
+
+            cssGraphicalImprovementsElement = GM_addStyle(cssGraphicalImprovements);
+        }
+    }
+
+    function disableGraphicalImprovements() {
+        if (cssGraphicalImprovementsElement) {
+            cssGraphicalImprovementsElement.remove();
+            cssGraphicalImprovementsElement = undefined;
         }
     }
 
@@ -591,13 +838,18 @@
             cssElementsPerPageElement.remove();
             cssElementsPerPageElement = undefined;
         }
+
+        disableGraphicalImprovements();
+
+        disableParamPerPage();
     }
 
     function enableElementsPerPage() {
         const pathname = window.location.pathname;
         if (pathname === '/' || pathname === '/search') {
-            const positionRightStatus = GM_getValue('subsettings_' + elNameElementsPerPagePosition, false);
+            const positionRightStatus = getConfigStatus(idElementsPerPage, idElementsPerPagePositionRight);
 
+            enableGraphicalImprovements();
             enablePerPageSelect(positionRightStatus);
         }
     }
@@ -609,7 +861,7 @@
         const pathname = window.location.pathname;
         if (pathname.startsWith('/thing:')) {
             // Set 6 elements per page in 'More' section
-            changeElementsPerPage(6);
+            setParamPerPage(6);
         }
     }
 
@@ -642,8 +894,7 @@
     function enableHideAds() {
         if (!cssHideAdsElement) {
             const cssHideAds =
-                `div[class^='CardGrid__']:has(> div[class^='AdCard__']),
-                 div[class^='AdCard__']{
+                `div[class^='ItemCardContainer__']:has(> div[class^='ItemCardHeader__'][title='Advertisement']) {
                     display: none !important;
                 }`;
 
@@ -663,12 +914,21 @@
 
     /* Change Elements Per Page */
 
-    function changeElementsPerPage(elementsPerPage) {
+    function setParamPerPage(elementsPerPage) {
+        // if already modified, reset
+        if (URLSearchParams.prototype._append) {
+            disableParamPerPage();
+        }
+
         URLSearchParams.prototype._append = URLSearchParams.prototype.append;
         URLSearchParams.prototype.append = function append(k, v) {
             if (k === 'per_page') v = elementsPerPage;
             return this._append(k, v);
         }
+    }
+
+    function disableParamPerPage() {
+        URLSearchParams.prototype.append = URLSearchParams.prototype._append;
     }
 
 
@@ -680,45 +940,81 @@
         // Get previously saved value for elements_per_page
         const elementsPerPage = GM_getValue('elements_per_page', availablePerPageValues[0]);
         // Change value of elements per page to load
-        changeElementsPerPage(elementsPerPage);
+        setParamPerPage(elementsPerPage);
 
         // Generate CSS
         const cssElementsPerPage =
-            `.plus-elements-per-page {
-                background-color: #fff;
-                width: 300px;
+            `/* Elements Per Page Style */
+    
+            .plus-elements-per-page {
+                position: relative;
+                width: 100%;
             }
 
             .plus-elements-per-page > label {
-                display: flex;
-                height: 30px;
                 opacity: 1;
+                -webkit-box-align: center;
+                -ms-flex-align: center;
+                -webkit-box-pack: justify;
+                -ms-flex-pack: justify;
+                align-items: center;
+                background-color: #fff;
+                border: 1px solid #d4d4d4;
+                border-radius: 12px;
+                color: #6c6c6c;
+                cursor: pointer;
+                display: -webkit-box;
+                display: -ms-flexbox;
+                display: flex;
+                font-family: Noto Sans Mono,Arial,Helvetica;
+                font-size: 12px;
+                font-weight: 400;
+                gap: 12px;
+                justify-content: space-between;
+                line-height: 16px;
+                min-height: 34px;
+                outline: none;
+                width: calc(100% - 2px);
             }
 
             .plus-elements-per-page > label > span {
-                flex-grow: 1;
-                padding: 10px 0 10px 10px;
+                font-family: Noto Sans Mono,Arial,Helvetica;
                 font-size: 12px;
-                line-height: 11px;
-                color: #555;
+                line-height: 16px;
+                padding-left: 12px;
             }
 
             .plus-elements-per-page > label > select {
-                width: 80px;
+                min-width: 80px;
                 height: 30px;
                 cursor: pointer;
                 border: 0;
-                border-left: 1px solid #eee;
-                color: #555;
+                border-left: 1px solid #d4d4d4;
+                color: #6c6c6c;
+                font-family: Noto Sans Mono,Arial,Helvetica;
+                font-size: 12px;
+                font-weight: 400;
+                padding-left: 12px;
+                margin-right: 12px;
             }
 
-            .plus-hidden {
+            .plus-hidden-left,
+            .plus-hidden-right {
                 visibility: hidden;
             }
 
-            @media (max-width: 1639px) {
-            .plus-hidden {
-                display: none;
+            @media (max-width: 1691px) {
+                .plus-hidden-left {
+                    display: none;
+                }
+                .plus-hidden-right {
+                    display: none;
+                }
+            }
+
+            @media (max-width: 2015px) {
+                .plus-hidden-d-none {
+                    display: none;
                 }
             }`;
 
@@ -733,9 +1029,12 @@
             availableOptions.push(option);
         });
 
-        // Generate empty filter
-        let emptyFilter = document.createElement('div');
-        emptyFilter.classList.add('plus-elements-per-page', 'plus-hidden');
+        // Generate empty filters
+        let emptyFilterLeft = document.createElement('div');
+        emptyFilterLeft.classList.add('plus-elements-per-page', 'plus-hidden-left');
+
+        let emptyFilterRight = document.createElement('div');
+        emptyFilterRight.classList.add('plus-elements-per-page', 'plus-hidden-right');
 
         // Generate html
         let htmlElementsPerPage = document.createElement('div');
@@ -753,8 +1052,8 @@
             const newPerPageValue = parseInt(this.value);
             if (availablePerPageValues.includes(newPerPageValue)) {
                 GM_setValue('elements_per_page', newPerPageValue);
+                setParamPerPage(newPerPageValue);
             }
-            window.location.reload();
         };
 
         let label = document.createElement('label');
@@ -769,15 +1068,36 @@
         cssElementsPerPageElement = GM_addStyle(cssElementsPerPage);
 
         // Add html
-        const filterBySortDiv = document.querySelector('div[class^="FilterBySort__dropdown--"]');
-        if (!positionRight) {
-            // Add html
-            filterBySortDiv.parentNode.prepend(htmlElementsPerPage);
-            filterBySortDiv.parentNode.append(emptyFilter);
-        } else {
-            // Add html
-            filterBySortDiv.parentNode.prepend(emptyFilter);
-            filterBySortDiv.parentNode.append(htmlElementsPerPage);
+        const searchFilterBar = 'div[class^="SearchFilterBar__"]';
+        const elSearchFilterBar = document.querySelector(searchFilterBar);
+
+        // Callback function to execute when mutations are observed
+        const addBarOption = (loadedSearchFilterBar, positionRight) => {
+            if (!positionRight) {
+                // Needs to be always hidden for smaller resolutions
+                emptyFilterLeft.classList.add('plus-hidden-d-none');
+
+                // Add html
+                loadedSearchFilterBar.prepend(emptyFilterLeft, htmlElementsPerPage);
+                loadedSearchFilterBar.append(emptyFilterRight);
+            } else {
+                // Needs to be always hidden for smaller resolutions
+                emptyFilterRight.classList.add('plus-hidden-d-none');
+
+                // Add html
+                loadedSearchFilterBar.prepend(emptyFilterLeft);
+                loadedSearchFilterBar.append(htmlElementsPerPage, emptyFilterRight);
+            }
+        };
+
+        // if element already present, else wait for load
+        if(elSearchFilterBar) {
+            addBarOption(elSearchFilterBar, positionRight);
+        }
+        else {
+            GM_wrench.waitForKeyElements(searchFilterBar, (loadedSearchFilterBar) => {
+                addBarOption(loadedSearchFilterBar, positionRight);
+            });
         }
     }
 
@@ -797,10 +1117,10 @@
     function createSpinnerLoadingCSS() {
         const cssToggleSwitch =
             `/* Spinner Loading */
-            
+
             .plus-spinner-wrapper {
                 display: flex;
-                position: absolute;                
+                position: absolute;
                 background: rgba(0,0,0,0.6);
                 left: 0;
                 top: 0;
@@ -808,9 +1128,9 @@
                 width: 100%;
                 align-items: center;
                 justify-content: center;
-                z-index: 1;                
+                z-index: 1;
             }
-    
+
             .plus-spinner-loading {
                 background-image: url(https://cdn.thingiverse.com/site/assets/inline-icons/19420d877d0e95abb31b.svg);
                 background-repeat: no-repeat;
@@ -819,10 +1139,10 @@
                 width: 117px;
                 animation: plus-spin 7s linear infinite;
             }
-            @keyframes plus-spin { 
-                100% { 
-                    transform:rotate(360deg); 
-                } 
+            @keyframes plus-spin {
+                100% {
+                    transform:rotate(360deg);
+                }
             }`;
 
         GM_addStyle(cssToggleSwitch);
@@ -1068,7 +1388,7 @@
         });
 
         // Include images
-        const includeImages = GM_getValue('subsettings_' + elNameDownloadAllFilesImages, false);
+        const includeImages = getConfigStatus(idDownloadAllFiles, idDownloadAllFilesImages);
 
         if (includeImages) {
             let imgFolder = zip.folder('images');
@@ -1107,7 +1427,7 @@
         if (downloadButton) {
             downloadAllFilesAttach(downloadButton);
         } else {
-            waitForKeyElements(sidebarMenuBtnSelector, (loadedDownloadButton) => {
+            GM_wrench.waitForKeyElements(sidebarMenuBtnSelector, (loadedDownloadButton) => {
                 downloadAllFilesAttach(loadedDownloadButton);
             });
         }
@@ -1127,7 +1447,7 @@
         if (downloadButton) {
             downloadAllFilesDetach(downloadButton);
         } else {
-            waitForKeyElements(sidebarMenuBtnSelector, (loadedDownloadButton) => {
+            GM_wrench.waitForKeyElements(sidebarMenuBtnSelector, (loadedDownloadButton) => {
                 downloadAllFilesDetach(loadedDownloadButton);
             });
         }
