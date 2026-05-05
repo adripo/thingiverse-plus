@@ -23,6 +23,8 @@
 //todo change plus-settings-checkbox with config
 //todo convert styles; example: var.style.cssText = 'display: none;'; into createNewOption.style.display = 'none;';
 //TODO change foreach with for.. of
+//TODO use GM_xmlhttpRequest for request
+//TODO return vs return null ??
 
 (function () {
     'use strict';
@@ -812,11 +814,19 @@
         }
     }
 
+    /** Features **/
+
+    /**/
+    //TODO move each function to its section
+
     function toggleDownloadAllFilesImages() {
-        let cb = document.getElementById('plus-checkbox-' + elNameDownloadAllFilesImages);
+        const elNameDownloadAllFilesImages = 'download-all-files-images';
+        //let cb = document.getElementById('plus-checkbox-' + elNameDownloadAllFilesImages);
 
         // update checkbox value
-        GM_setValue('subsettings_' + elNameDownloadAllFilesImages, cb.checked);
+        //updateConfigStatus(cb, );
+        //GM_setValue('subsettings_' + elNameDownloadAllFilesImages, cb.checked);
+        //TODO fix download subsettings
     }
 
     function toggleElementsPerPagePosition() {
@@ -934,6 +944,7 @@
 
     /* Append Per Page Select */
 
+    //TODO Elements per page needs Graphical improvements - automatically enable when enabled and lock disable
     function enablePerPageSelect(positionRight = false) {
         const availablePerPageValues = [20, 30, 60, 100, 200];
 
@@ -1173,6 +1184,7 @@
 
         const bearer = extractBearer();
 
+        //todo change request with GM_xmlhttpRequest
         if (bearer) {
             const username = extractUsername();
 
@@ -1180,7 +1192,7 @@
 
             getCollections(username, bearer)
                 .then(collectionsList => {
-                    //console.log('Successfully retrieved Collections.');
+                    console.log('Successfully retrieved Collections.');
 
                     // Put most recent Collection in the first place
                     let indexMR = indexOfMostRecentCollection(collectionsList);
@@ -1347,7 +1359,8 @@
                 if (mutation.type === "childList") {
                     mutation.addedNodes.forEach(node => {
                         node.classList.forEach(cls => {
-                            if (cls.startsWith("CollectThingWindow__collectWindowContainer--")) {
+                            //if (cls.startsWith("CollectThingModal__collectThingFields--")) {
+                            if (cls.startsWith("ReactModal__Overlay")) {
                                 loadAdvancedCollections(node);
                             }
                         });
